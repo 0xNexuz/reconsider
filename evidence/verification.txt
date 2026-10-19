@@ -1,0 +1,115 @@
+Reconsider backend verification — 2026-10-19 (Africa/Lagos)
+Environment: Windows, Node v24.12.0. Local execution only.
+
+npm run typecheck
+Exit 0. TypeScript compilation check passed.
+
+npm test (after repairing quote INSERT placeholder count)
+tests 15
+pass 15
+fail 0
+cancelled 0
+skipped 0
+duration_ms 2655.0158
+
+Verified cases:
+1. Authentication, ownership, and session expiry
+2. Monetary-field rejection and server-calculated quote difference
+3. Stale stock and changed-price quote rejection
+4. Concurrent confirmation, same-key replay, and conflicting-key replay
+5. Refund without provider/image; nonvisual return fallback
+6. Return-window and quote-expiry boundaries
+7. Upload consent, malformed bytes, metadata stripping, image ownership/deletion
+8. Disabled provider produces explicit unavailable response
+9. Mock provider job/task/result lifecycle and preview ownership
+10. Late provider result cannot resurrect a deleted job
+11. Durable render-attempt quota
+12. Interrupted submission recovery and polling limit
+13. Mock HTTP YouCam metadata/PUT/task/poll wire contract
+14. Provider URL allowlist rejects local/deceptive destinations
+15. Provider HTTP/schema errors fail closed
+
+npm run build
+Exit 0. Compiled dist output generated.
+
+npm run smoke
+PASS: compiled server, real HTTP, persisted session, protected route, provider disabled.
+Exit 0. Temporary SQLite database and child server cleaned up.
+
+npm run seed
+Exit 0. Demonstration catalog/orders and local 24-hour sessions created.
+Tokens stored in ignored demo-access.json; not included in this evidence.
+
+npm install --include=optional
+Completed after network retries and native binary repair.
+Audit at installation: 0 known vulnerabilities, 63 packages audited.
+Initial sharp version was upgraded to 0.35.5 after an audit finding.
+
+Known earlier failures, resolved:
+- Registry connection resets interrupted dependency installation.
+- Missing Windows sharp optional binary prevented backend tests loading.
+- First complete suite exposed a quote SQL placeholder mismatch; repaired and suite rerun.
+
+Not verified:
+- Live YouCam authorization, actual rendering quality, provider storage retention, or credit consumption.
+- Production identity, merchant APIs, payment/refund execution, stock reservation, or fulfillment.
+- Public deployment, independent security audit, user demand, or business impact.
+Provider tests are MOCKED. Commerce inputs are SIMULATED. Local API/SQLite execution is REAL — LOCAL.
+
+Continuation verification — 2026-10-19 (Africa/Lagos)
+Change: GET /v1/products/:id/image retrieves a merchant reference JPEG only for an authenticated shopper with an active eligible order. Candidate stock and asset expiry/deletion are checked. Response uses no-store caching.
+
+node --import tsx --test test/backend.test.ts
+Exit 0. tests 13, pass 13, fail 0.
+
+npm run typecheck
+Exit 0.
+
+npm test
+Exit 0. tests 16, pass 16, fail 0, skipped 0.
+
+npm run build
+Exit 0.
+
+npm run smoke
+Exit 0. Compiled local server, real HTTP, persisted session, protected route, and disabled provider verified.
+
+The added route test checks unauthenticated and unrelated-user denial, authorized JPEG bytes and headers, and denial after candidate stock becomes zero. No provider request, API credits, deployment, or key handling occurred in this continuation.
+
+Offline integration preflight — 2026-10-19 (Africa/Lagos)
+Change: npm run integration:check validates two local images using the application's normalization rules, and reports key presence and enablement without printing credentials or making network requests.
+
+npm test
+Exit 0. tests 17, pass 17, fail 0, skipped 0. The new test uses generated local images, verifies an invalid path fails, and confirms a sentinel key never appears in output.
+
+npm run typecheck
+Exit 0.
+
+npm run build
+Exit 0.
+
+No live YouCam call, API credit spend, deployment, or credential handling occurred in this milestone. Live visual quality and billing remain UNVERIFIED.
+
+One live synthetic YouCam run — 2026-10-19 (Africa/Lagos)
+User authorized continuing after adding the API key. The key was read only from ignored local .env and was never printed or saved in evidence. One isolated in-memory app/worker run queued exactly one Clothes V4 task using generated synthetic shopper and garment images. The task SUCCEEDED, and the result was downloaded and saved as demo-assets/youcam-result-1792439336399.jpg. Evidence/live-run-1792439336401.json contains sanitized timing and state only; no signed URL or task ID is stored there.
+
+Visual inspection: the synthetic shopper appears wearing the cobalt-blue blouse. The V-neck and long sleeves are visible; pose and main identity appear broadly preserved. This is one subjective observation, not a fit, reliability, demographic-quality, or merchant-value validation.
+
+Security limitation: the first live runner inherited NODE_TLS_REJECT_UNAUTHORIZED=0 from its shell, producing a warning and disabling TLS certificate verification for that run. The runner now deletes this unsafe inherited setting before network access, matching src/server.ts. No second task was submitted, so the live result cannot prove verified TLS behavior. The provider task succeeded, but the transport-security aspect of that run is limited.
+
+Post-run local verification: npm test exit 0, 18/18 passed; npm run typecheck exit 0; npm run build exit 0. A new test confirms the live runner refuses to start without explicit one-render gating and does not print a sentinel key.
+
+No production merchant, payment, or fulfillment service was used. Provider billing amount and retention were not observed. No deployment or publication occurred.
+
+Local shopper walkthrough and submission preparation — 2026-10-19 (Africa/Lagos)
+Change: same-origin browser view added for the existing protected API, including order lookup, reason-specific alternatives, quote, recorded synthetic comparison, and exchange/refund request. Recorded YouCam imagery is explicitly labeled as a prior synthetic example; the demo does not request another provider task while YouCam is disabled. Devpost text and a 2:20 video shot plan were drafted locally.
+
+Browser walkthrough: desktop and 375px mobile views inspected in the in-app browser. A local Bob demo session selected the v-neck candidate, saw its stored merchant reference beside the recorded synthetic result, and created a persisted REQUESTED exchange receipt. The browser was reloaded afterward. No permanent UI screenshot artifact was saved. Refund was covered by the backend suite, not this browser walkthrough.
+
+node --check web/app.js — exit 0.
+npm run typecheck — exit 0.
+npm test — exit 0; 19 tests passed, 0 failed/skipped. New test checks the public demo assets and confirms /v1/orders remains protected.
+npm run build — exit 0.
+npm run smoke — exit 0; compiled server, real HTTP, persisted session, protected route, disabled provider.
+
+Git repository initialized locally on main. Ignored .env, demo-access.json, data/, node_modules/, and dist/ were checked before staging. No remote, push, deployment, video upload, or Devpost submission exists. No further YouCam task or paid credit was used in this milestone.

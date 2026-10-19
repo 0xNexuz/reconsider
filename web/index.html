@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f4ef">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/demo/styles.css">
+  <script src="/demo/app.js" defer></script>
+  <title>Reconsider — see the replacement before you choose it</title>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the decision</a>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="Reconsider home">reconsider<span class="mark">.</span></a>
+    <div class="top-right"><span class="eyebrow">A better way to return</span><span class="pill">LOCAL DEMO</span></div>
+  </header>
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="overline">THE VISUAL EXCHANGE DESK</p>
+        <h1 id="hero-title">The right piece is <em>worth</em> a second look.</h1>
+        <p class="lede">When a purchase doesn't feel right, see an eligible replacement before choosing an exchange or a refund.</p>
+        <div class="hero-meta"><span>01 / Find a better match</span><span>02 / Compare the look</span><span>03 / Decide with confidence</span></div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-photo"><img src="/demo/recorded-result.jpg" alt="Recorded YouCam preview of a synthetic shopper wearing a blue blouse" width="1024" height="1536"></div>
+        <div class="hero-stamp">REAL YOUCAM RESULT<br><strong>RECORDED • SYNTHETIC</strong></div>
+      </div>
+    </section>
+    <div class="truthbar"><span>Prototype commerce data is simulated.</span><span>Preview shown above is a recorded YouCam result, not a new render.</span><span>No payment or shipment occurs here.</span></div>
+    <section class="desk" aria-labelledby="desk-title">
+      <div class="desk-heading"><div><p class="overline">YOUR DECISION, MADE CLEARER</p><h2 id="desk-title">Find your next yes.</h2></div><p>Use a seeded local shopper session to explore the return flow. Your choices go through the real local API.</p></div>
+      <div class="desk-grid">
+        <aside class="steps" aria-label="Exchange progress"><div class="step active" data-step="1"><span class="step-number">01</span><div><strong>Connect</strong><small>Open your order</small></div></div><div class="step" data-step="2"><span class="step-number">02</span><div><strong>Explore</strong><small>Choose a replacement</small></div></div><div class="step" data-step="3"><span class="step-number">03</span><div><strong>Compare</strong><small>See the visual example</small></div></div><div class="step" data-step="4"><span class="step-number">04</span><div><strong>Decide</strong><small>Request exchange or refund</small></div></div></aside>
+        <div class="workarea">
+          <div id="notice" class="notice" role="status" aria-live="polite"></div>
+          <section id="connect-panel" class="panel" aria-labelledby="connect-title"><div class="panel-kicker">STEP 01</div><h3 id="connect-title">Open your order</h3><p>Paste Alice's local demo token from <code>demo-access.json</code>. It stays in this browser tab and is never placed in a URL.</p><form id="connect-form"><label for="token">Demo bearer token</label><input id="token" name="token" type="password" autocomplete="off" required placeholder="Paste your local token"><button class="button primary" type="submit">Open my order <span aria-hidden="true">↗</span></button></form><p class="helper">Run <code>npm run seed</code> first. The token expires after 24 hours.</p></section>
+          <section id="explore-panel" class="panel" aria-labelledby="explore-title" hidden><div class="panel-kicker">STEP 02</div><h3 id="explore-title">What didn't feel right?</h3><p id="order-summary"></p><label for="reason">Reason for return</label><select id="reason"><option value="style">The style wasn't quite right</option><option value="size">Size or fit</option><option value="damaged">Arrived damaged</option><option value="other">Something else</option></select><p class="helper">Visual alternatives are shown for style-related returns. Every reason can still use the standard refund path.</p><button class="button primary" id="find-button" type="button">Find alternatives <span aria-hidden="true">↗</span></button><div id="candidate-area" hidden><div class="section-break"><span>ELIGIBLE REPLACEMENTS</span><span>LIVE LOCAL CATALOG</span></div><div id="candidates" class="candidates"></div></div><button class="text-button" id="refund-button" type="button">Prefer a standard refund? Request it here →</button></section>
+          <section id="compare-panel" class="panel" aria-labelledby="compare-title" hidden><div class="panel-kicker">STEP 03</div><h3 id="compare-title">Picture the alternative.</h3><p id="quote-summary"></p><div class="comparison"><figure><div class="comparison-image"><img id="reference-image" src="/demo/blouse.png" alt="Selected garment reference" width="1024" height="1536"></div><figcaption>PRODUCT REFERENCE</figcaption></figure><figure id="result-figure"><div class="comparison-image"><img id="result-image" src="/demo/recorded-result.jpg" alt="Recorded synthetic YouCam try-on example" width="1024" height="1536"></div><figcaption id="result-caption">RECORDED YOUCAM RESULT • SYNTHETIC EXAMPLE</figcaption></figure></div><p id="comparison-disclosure" class="disclosure">This recorded example is not a preview of your uploaded photo. A virtual try-on shows appearance, not exact fit. The reference and result are generated demo imagery.</p><div id="live-preview-area" class="live-preview" hidden><h4>Make a new YouCam preview</h4><p>This sends your photo and the garment reference to YouCam and may use API units.</p><label for="photo">Your photo (JPEG or PNG)</label><input id="photo" type="file" accept="image/jpeg,image/png"><label class="check"><input id="provider-consent" type="checkbox">I consent to this image being sent to YouCam for this preview.</label><button class="button outline" id="preview-button" type="button">Generate a live preview</button><p id="preview-status" class="helper" role="status" aria-live="polite"></p></div><div class="decision-row"><button class="button outline" id="back-button" type="button">Back to alternatives</button><button class="button primary" id="exchange-button" type="button">Request this exchange <span aria-hidden="true">↗</span></button></div><p class="helper">The quote expires after ten minutes. Stock and price are rechecked when you request the exchange.</p></section>
+          <section id="receipt-panel" class="panel receipt" aria-labelledby="receipt-title" hidden><div class="panel-kicker">STEP 04</div><h3 id="receipt-title">Your request is recorded.</h3><p id="receipt-summary"></p><div class="receipt-box"><span>STATUS</span><strong>REQUESTED</strong><small>SIMULATED COMMERCE • NO PAYMENT, STOCK RESERVATION, OR SHIPMENT</small></div><p>In a connected retail service, the merchant would now review and fulfill the request. This prototype stores your decision locally.</p><button class="button outline" id="restart-button" type="button">View request history</button><div id="history"></div></section>
+        </div>
+      </div>
+    </section>
+    <section class="closing"><p class="overline">WHY RECONSIDER</p><h2>Less guesswork.<br><em>More confidence.</em></h2><p>Ordinary return tools tell you what's available. Reconsider connects a return reason, an eligible replacement, a personal visual preview, and a revalidated decision. The current retailer catalog is demonstration data.</p></section>
+  </main>
+  <footer><span class="wordmark">reconsider<span class="mark">.</span></span><p>Local hackathon prototype · YouCam Clothes V4 · Appearance preview is not a fit guarantee.</p></footer>
+</body>
+</html>
