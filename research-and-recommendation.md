@@ -1,5 +1,7 @@
 # Reconsider — research and build recommendation
 
+> Historical planning snapshot from 18 October 2026. Implementation and verification progressed afterward; see [project context](docs/PROJECT_CONTEXT.md) and [verification evidence](evidence/verification.txt) for current status.
+
 Research date: 18 October 2026. Planning only. No application, API execution, user interviews, or performance tests have been completed. Brand name availability is UNVERIFIED.
 
 ## Verdict

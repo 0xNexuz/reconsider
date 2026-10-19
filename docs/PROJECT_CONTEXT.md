@@ -5,8 +5,8 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 ## Project identity and Git state
 
 - **Project:** Reconsider, a visual exchange desk for apparel returns. The selected idea is APPROVED through the user's October 18 request to begin backend and integrations.
-- **Directory:** `C:\Users\USER\Documents\Codex\2026-10-18\use-the-information-in-this-page\outputs\reconsider`.
-- **Git:** local repository initialized on `main` on 2026-10-19. No remote or public repository; check `git log` before claiming a commit. No push or PR is claimed.
+- **Directory:** repository root.
+- **Git:** local repository on `main`; public repository publication was authorized on 2026-10-19. Verify the remote and pushed HEAD before claiming publication. No PR is claimed.
 - **Current stage:** local SUBMISSION PREPARATION and READINESS. Overall product status: PARTIAL; not submission-ready.
 
 ## Hackathon and strategic decisions
@@ -22,7 +22,7 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 - **Stack:** TypeScript/Node 24, Fastify, Node SQLite, sharp, Zod. Local default binding `127.0.0.1`.
 - **State:** demo orders/catalog, server-side quotes, idempotent requests, normalized images, durable render jobs. User bearer sessions are seeded locally and valid 24 hours.
 - **Provider:** server-only YouCam Clothes V4 adapter. The user added a key locally; `YOUCAM_ENABLED=false` remains in `.env`. One isolated run was explicitly authorized by “you can handle the rest” and completed. Do not repeat a paid run without fresh authorization.
-- **Approved scope:** backend and integrations, local implementation, testing, and submission preparation. No deployment, publication, submission, or credential disclosure is authorized. A further provider run is a new cost boundary.
+- **Approved scope:** backend and integrations, local implementation/testing/submission preparation, and publication of this GitHub source repository. No app deployment, demo-video publication, Devpost submission, or credential disclosure is authorized. A further provider run is a new cost boundary.
 - **Trust limits:** sample commerce data is SIMULATED. No merchant account, payment, inventory reservation, or fulfillment integration exists. Provider wire behavior is MOCKED in tests; one live render with SYNTHETIC images succeeded.
 
 ## Verified milestones and evidence
@@ -91,6 +91,11 @@ The previous installation audit found zero known vulnerabilities after the sharp
 - **Decision:** add an optional rate-limited guest session that creates an isolated sample order and a one-click browser entry. Guest sessions cannot upload images or create paid preview tasks, even when YouCam is configured. Loopback enables the route automatically; a non-loopback bind requires explicit configuration and release approval.
 - **Evidence:** local tests include disabled-by-default behavior, guest isolation and expiry, and denial of provider endpoints; final browser walkthrough and command results are in [verification](../evidence/verification.txt).
 - **Impact:** a judge can replay exchange/refund decisions without finding a bearer token or inheriting a used order. The recorded YouCam output remains a prior synthetic run, not a new render on each visit.
+
+### 2026-10-19 — Public source repository authorized
+
+- **Decision:** publish the existing local source to a public GitHub repository. The user selected MIT for code and documentation while excluding demo images from that grant; [asset terms](../ASSETS.md) explain the distinction.
+- **Boundary:** source publication only. A judge-accessible deployed app, public video, further API credits, and Devpost submission remain separate steps.
 
 ## Next action and boundary
 
