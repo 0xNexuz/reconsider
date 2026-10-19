@@ -40,7 +40,7 @@ If showing the stale-stock failure, start a fresh guest order after restoring st
 
 ## Submission fields still to fill
 
-- **Code repository URL:** BLOCKED — local Git repository exists, but no remote or public/private shared repository yet.
+- **Code repository URL:** [https://github.com/0xNexuz/reconsider](https://github.com/0xNexuz/reconsider) — public source with MIT code/documentation licensing and an explicit demo-image exclusion.
 - **Working project/test access URL or test build:** BLOCKED — no deployment or distributable test link yet. Judges must have access through the judging period.
 - **Public YouTube/Vimeo 1–3-minute video URL:** BLOCKED — no video recorded or uploaded.
 - **Screenshots:** to capture from the tested local browser flow, with visible real-versus-demo labels.

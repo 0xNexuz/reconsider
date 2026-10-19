@@ -6,7 +6,7 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 
 - **Project:** Reconsider, a visual exchange desk for apparel returns. The selected idea is APPROVED through the user's October 18 request to begin backend and integrations.
 - **Directory:** repository root.
-- **Git:** local repository on `main`; public repository publication was authorized on 2026-10-19. Verify the remote and pushed HEAD before claiming publication. No PR is claimed.
+- **Git:** `main` tracks public [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The initial public push was verified against the remote HEAD on 2026-10-19. No PR is claimed; check Git state on continuation.
 - **Current stage:** local SUBMISSION PREPARATION and READINESS. Overall product status: PARTIAL; not submission-ready.
 
 ## Hackathon and strategic decisions
@@ -41,7 +41,7 @@ The previous installation audit found zero known vulnerabilities after the sharp
 
 ## Priorities and blockers
 
-- **P0 for submission:** verify entrant eligibility and registration; provide a judge-accessible working build and public/source-accessible repository with an appropriate license; record and publish a public 1–3 minute demo video; submit the Devpost entry before the deadline. External release and submission require approval.
+- **P0 for submission:** public source repository with MIT code/documentation licensing is DONE. Verify entrant eligibility and registration; provide a judge-accessible working build; record and publish a public 1–3 minute demo video; submit the Devpost entry before the deadline. Those remaining external steps require approval.
 - **P0 technical caveat:** one synthetic live YouCam render succeeded and was visually inspected. Billing, provider retention, repeated-run reliability, and merchant demand remain unverified. Rotate the key before further provider use because the prior live run inherited disabled TLS verification.
 - **P1:** production identity, merchant authorization, image storage/retention, and a real commerce adapter are needed before public use. These are outside the current local prototype.
 - **P2:** formal API contract and a reusable quote module after a second adopter exists.
@@ -94,9 +94,9 @@ The previous installation audit found zero known vulnerabilities after the sharp
 
 ### 2026-10-19 — Public source repository authorized
 
-- **Decision:** publish the existing local source to a public GitHub repository. The user selected MIT for code and documentation while excluding demo images from that grant; [asset terms](../ASSETS.md) explain the distinction.
+- **Decision:** published the existing local source at [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The user selected MIT for code and documentation while excluding demo images from that grant; [asset terms](../ASSETS.md) explain the distinction. The public `main` branch and expected source/asset files were verified; `.env`, demo tokens, database, dependencies, and build output were absent from the remote tree.
 - **Boundary:** source publication only. A judge-accessible deployed app, public video, further API credits, and Devpost submission remain separate steps.
 
 ## Next action and boundary
 
-Run the final browser checks and preserve this milestone in local Git. Then obtain user decisions/approval for a repository and license, judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to any published assets. Assess whether the judging build needs an authorized, budgeted live-render path; any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.
+The public source and license gate is complete. Next obtain user approval for judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to the published assets. Assess whether the judging build needs an authorized, budgeted live-render path; any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.

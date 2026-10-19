@@ -2,6 +2,8 @@
 
 A local API for reason-aware apparel exchanges: eligible replacements, trusted price quotes, optional YouCam previews, and explicit exchange/refund requests.
 
+Public source: [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The app itself is still a local prototype; publishing this source did not deploy the browser demo.
+
 Source code, scripts, and documentation are [MIT licensed](LICENSE). The synthetic demo images and recorded YouCam output are [excluded from that license](ASSETS.md) and included for project evaluation.
 
 **Commerce is demonstration data.** A request does not charge/refund money, reserve stock, or ship a replacement. YouCam is disabled by default; there is no mock provider in the running application. Automated provider tests use mocked HTTP; one separately recorded synthetic live task succeeded.
@@ -91,5 +93,5 @@ npm run smoke
 
 Tests cover ownership, quote tampering, stale inventory/price, concurrent duplicate decisions, refund independence, expiration, image processing, late-result deletion, persistent quotas, bounded polling, and the provider wire contract. See [evidence](evidence/verification.txt) for recorded results and [current harness status](docs/build-harness/implementation-status.md).
 
-No Shopify, Loop, or ReturnGO account has been connected. No user funds move. No project has been deployed or submitted. The local browser flow was tested through a persisted exchange receipt. The [Devpost draft](docs/submission-draft.md) and [submission map](docs/build-harness/12_submission-map.md) list the remaining public repository, judging access, video, eligibility, and rights gates.
+No Shopify, Loop, or ReturnGO account has been connected. No user funds move. No app has been deployed or submitted to Devpost. The local browser flow was tested through a persisted exchange receipt. The [Devpost draft](docs/submission-draft.md) and [submission map](docs/build-harness/12_submission-map.md) list the remaining judging access, video, eligibility, and rights gates.
 The key stays in ignored `.env`; `YOUCAM_ENABLED=false` remains the resting configuration. Any additional live task requires renewed authorization because it may consume credits.
