@@ -5,6 +5,7 @@ let order = null;
 let quote = null;
 let selected = null;
 let providerAvailable = false;
+let isGuest = false;
 let referenceURL = null;
 const messages = {
   UNAUTHORIZED: 'That session has expired. Run npm run seed and paste the new Alice token.',
@@ -12,7 +13,9 @@ const messages = {
   QUOTE_STALE: 'The item changed since you chose it. Find alternatives again for a fresh quote.',
   QUOTE_EXPIRED: 'The quote expired. Select the item again for a fresh quote.',
   YOUCAM_NOT_CONFIGURED: 'Live previews are disabled for this local demo. The recorded example remains available.',
-  RENDER_BUDGET_EXHAUSTED: 'The daily preview limit has been reached. You can still request an exchange or refund.'
+  RENDER_BUDGET_EXHAUSTED: 'The daily preview limit has been reached. You can still request an exchange or refund.',
+  DEMO_LIMIT: 'This demo has reached its session limit. Please try later or use a seeded local token.',
+  DEMO_NOT_SEEDED: 'The sample catalog is missing. Run npm run seed and reload.'
 };
 function notice(message, error = false) {
   const el = $('notice'); el.textContent = message; el.classList.toggle('error', error);
@@ -27,6 +30,7 @@ function show(name) {
 function money(cents, currency = 'USD') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100);
 }
+function orderLabel() { return isGuest ? 'Sample order' : `Order ${order.id}`; }
 async function api(path, options = {}) {
   const headers = { authorization: `Bearer ${token}`, ...options.headers };
   const response = await fetch(path, { ...options, headers, cache: 'no-store' });
@@ -55,18 +59,39 @@ async function connect(event) {
   event.preventDefault();
   const button = event.submitter;
   token = $('token').value.trim();
+  isGuest = false;
   if (!token) return;
   setBusy(button, true, 'Open my order ↗');
   try {
+    await openOrder();
+  } catch (error) { notice(error.message, true); }
+  finally { setBusy(button, false, 'Open my order'); }
+}
+async function openOrder() {
     const [orders, health] = await Promise.all([api('/v1/orders'), fetch('/health').then(r => r.json())]);
-    order = orders.data.find(item => item.id === 'order-alice') || orders.data[0];
+    order = orders.data[0];
     if (!order) throw new Error('No demo order found. Run npm run seed first.');
-    providerAvailable = health.youcam !== 'DISABLED';
-    $('order-summary').textContent = `Order ${order.id}: ${money(order.paid, order.currency)} paid. Choose why you're returning it.`;
+    providerAvailable = !isGuest && health.youcam !== 'DISABLED';
+    $('order-summary').textContent = `${orderLabel()} · ${money(order.paid, order.currency)} paid. Choose why you're returning it.`;
     $('live-preview-area').hidden = !providerAvailable;
     show('explore');
+}
+async function startDemo(event) {
+  const button = event.currentTarget;
+  const label = button.textContent;
+  setBusy(button, true, label);
+  try {
+    const response = await fetch('/demo/session', { method: 'POST', cache: 'no-store' });
+    const body = await response.json();
+    if (!response.ok) throw new Error(messages[body.error] || 'The guided demo is unavailable. Try a seeded local token.');
+    token = body.token; isGuest = true; quote = null; selected = null;
+    $('reason').value = 'style';
+    $('candidate-area').hidden = true;
+    $('candidates').replaceChildren();
+    $('history').replaceChildren();
+    await openOrder();
   } catch (error) { notice(error.message, true); }
-  finally { setBusy(button, false, 'Open my order ↗'); }
+  finally { setBusy(button, false, label); }
 }
 async function findCandidates() {
   const button = $('find-button'); setBusy(button, true, 'Find alternatives ↗');
@@ -89,6 +114,9 @@ async function findCandidates() {
         const placeholder = document.createElement('div'); placeholder.className = 'candidate-placeholder'; placeholder.textContent = 'Product image not available'; card.append(placeholder);
       }
       const body = document.createElement('div'); body.className = 'candidate-body';
+      if (product.id === 'v-neck') {
+        const badge = document.createElement('span'); badge.className = 'candidate-badge'; badge.textContent = 'Recorded try-on available'; body.append(badge);
+      }
       const title = document.createElement('h4'); title.textContent = product.name;
       const detail = document.createElement('p'); detail.textContent = `Size ${product.size} · ${product.neckline} neckline`;
       const price = document.createElement('div'); price.className = 'price'; price.textContent = `${money(Math.abs(product.price - order.paid), product.currency)} ${product.price >= order.paid ? 'additional' : 'credit'}`;
@@ -158,8 +186,8 @@ async function decide(kind) {
     const payload = kind === 'refund' ? { kind, orderId: order.id } : { kind, orderId: order.id, quoteId: quote.id };
     const result = await api('/v1/requests', { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': `request-${crypto.randomUUID()}` }, body: JSON.stringify(payload) });
     $('receipt-summary').textContent = kind === 'refund'
-      ? `A standard refund request was recorded for ${order.id}. No money has moved.`
-      : `An exchange request for ${selected.name} was recorded for ${order.id}. No money has moved.`;
+      ? `A standard refund request was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`
+      : `An exchange request for ${selected.name} was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`;
     show('receipt'); await history();
   } catch (error) {
     if (['QUOTE_STALE', 'QUOTE_EXPIRED'].includes(error.code)) show('explore');
@@ -178,6 +206,8 @@ async function history() {
   } catch (error) { notice(error.message, true); }
 }
 $('connect-form').addEventListener('submit', connect);
+$('start-demo-button').addEventListener('click', startDemo);
+$('new-demo-button').addEventListener('click', startDemo);
 $('find-button').addEventListener('click', findCandidates);
 $('reason').addEventListener('change', () => { $('candidate-area').hidden = true; $('candidates').replaceChildren(); });
 $('refund-button').addEventListener('click', () => decide('refund'));

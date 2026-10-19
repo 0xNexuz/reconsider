@@ -113,3 +113,12 @@ npm run build — exit 0.
 npm run smoke — exit 0; compiled server, real HTTP, persisted session, protected route, disabled provider.
 
 Git repository initialized locally on main. Ignored .env, demo-access.json, data/, node_modules/, and dist/ were checked before staging. No remote, push, deployment, video upload, or Devpost submission exists. No further YouCam task or paid credit was used in this milestone.
+
+Judge-flow usability repair — 2026-10-19 (Africa/Lagos)
+Observation: the previous page required finding and pasting a local bearer token, and a completed sample order could not be replayed. This was a material obstacle to judge testing.
+
+Change: optional POST /demo/session creates a private sample order and 24-hour bearer session. It is on automatically for loopback binding; non-loopback deployment requires explicit DEMO_GUEST_SESSIONS=true. The route has per-IP and active-session limits. Guest sessions are blocked from /v1/images and /v1/previews even if the provider is configured, so the one-click path cannot spend YouCam units. The UI now offers Start the guided demo and Try another decision, prioritizes the garment with a recorded example, and resets stale candidate UI between guest orders. The prior live YouCam result remains visibly labeled recorded/synthetic.
+
+Final local checks: node --check web/app.js exit 0; npm run typecheck exit 0; npm test exit 0 (20 pass, 0 fail); npm run build exit 0; npm run smoke exit 0. The added test covers disabled guest-route behavior, separate order ownership, exchange and refund requests, guest provider denial, and session expiry.
+
+Actual browser walkthrough on localhost: clicked Start the guided demo, selected the V-neck alternative, viewed its product reference and recorded YouCam example, and reached a persisted exchange receipt. Started another sample order and reached a refund receipt. After the UI reset correction, a fresh order displayed no prior candidates. No further provider task, external deployment, or public submission occurred.

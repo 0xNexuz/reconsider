@@ -29,14 +29,14 @@ Use actual screen footage from the local browser view; show the recorded image o
 | Time | Footage | Narration point |
 |---|---|---|
 | 0:00–0:15 | Hero and return problem | “A style return is often a decision made without seeing the alternative.” |
-| 0:15–0:38 | Open seeded order; select style | “Reconsider starts from an order and the shopper's reason.” |
+| 0:15–0:38 | Click Start the guided demo; select style | “Reconsider starts from an isolated sample order and the shopper's reason.” |
 | 0:38–0:58 | In-stock alternatives and price difference | “Eligibility and differences come from the server, not browser-entered prices.” |
 | 0:58–1:23 | Product reference beside labeled recorded result | “YouCam Clothes V4 powers the visual comparison. This example was generated in one earlier synthetic live run.” |
 | 1:23–1:43 | Request exchange and receipt | “The quote is rechecked; the request is stored, but nothing is charged or shipped.” |
 | 1:43–2:00 | Fresh order or edited footage of refund path | “A standard refund remains available without sending a photo.” |
 | 2:00–2:20 | Code/evidence view and closing | “One real API task succeeded; the local tests cover ownership, stale stock, and duplicate requests. Merchant impact remains to be validated.” |
 
-If showing the stale-stock failure, use a separate seeded order or restore the demo database before recording the next step; never splice UI footage so it falsely implies a single uninterrupted successful flow.
+If showing the stale-stock failure, start a fresh guest order after restoring stock; never splice UI footage so it falsely implies a single uninterrupted successful flow.
 
 ## Submission fields still to fill
 

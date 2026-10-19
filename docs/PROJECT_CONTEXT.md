@@ -34,7 +34,7 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 | YouCam upload/task/poll adapter | VERIFIED for one synthetic live run; broader reliability UNVERIFIED | One task succeeded and returned a saved image; [sanitized run record](../evidence/live-run-1792439336401.json) |
 | Shopper retrieval of merchant garment reference image | VERIFIED locally | Full 16/16 suite includes authentication, ownership, stock, and byte-response checks; see [verification](../evidence/verification.txt) |
 | Offline integration preflight | VERIFIED locally | Local image normalization and redacted key-presence check; full suite 17/17, typecheck and build passed |
-| Same-origin shopper view | VERIFIED locally | Browser walkthrough: token, candidate selection, recorded comparison, quote, and persisted exchange receipt. Latest suite 19/19; see [verification](../evidence/verification.txt) |
+| Same-origin shopper view | VERIFIED locally | One-click isolated guest order, candidate selection, recorded comparison, quote, and persisted exchange receipt. Latest suite 20/20; see [verification](../evidence/verification.txt) |
 | Submission copy and shot plan | DRAFTED locally | [Draft](submission-draft.md) and [submission map](build-harness/12_submission-map.md); no video or public URL yet |
 
 The previous installation audit found zero known vulnerabilities after the sharp update. That is a historical command result, not a continuing security guarantee.
@@ -86,6 +86,12 @@ The previous installation audit found zero known vulnerabilities after the sharp
 - **Evidence:** browser walkthrough on desktop and mobile reached a persisted exchange receipt; public assets and protected API behavior are covered by the local test suite. [Submission draft](submission-draft.md) contains honest Devpost copy and a video shot plan.
 - **Impact:** the core journey is demonstrable without additional API credits. Merchant order processing remains simulated.
 
+### 2026-10-19 — Remove judge-facing token friction
+
+- **Decision:** add an optional rate-limited guest session that creates an isolated sample order and a one-click browser entry. Guest sessions cannot upload images or create paid preview tasks, even when YouCam is configured. Loopback enables the route automatically; a non-loopback bind requires explicit configuration and release approval.
+- **Evidence:** local tests include disabled-by-default behavior, guest isolation and expiry, and denial of provider endpoints; final browser walkthrough and command results are in [verification](../evidence/verification.txt).
+- **Impact:** a judge can replay exchange/refund decisions without finding a bearer token or inheriting a used order. The recorded YouCam output remains a prior synthetic run, not a new render on each visit.
+
 ## Next action and boundary
 
-Run the final local checks and preserve this milestone in local Git. Then obtain user decisions/approval for a repository and license, judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to any published assets. Any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.
+Run the final browser checks and preserve this milestone in local Git. Then obtain user decisions/approval for a repository and license, judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to any published assets. Assess whether the judging build needs an authorized, budgeted live-render path; any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.

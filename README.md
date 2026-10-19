@@ -19,7 +19,7 @@ npm run build
 npm start
 ```
 
-Open the browser view at `http://127.0.0.1:3100/`. `GET /health` is public. All `/v1` endpoints require `Authorization: Bearer <token>`. Paste Alice's local demo token from ignored `demo-access.json` into the browser view; it is kept in tab memory. Seeding writes random 24-hour Alice/Bob tokens and only hashes are stored in the database. Seeding again rotates tokens but preserves existing requests. If an order already has a request, use a fresh local database or a new demonstration order; re-seeding does not erase it. Do not expose this prototype on the public internet: production identity, distributed rate limits, encryption-at-rest, and merchant integrations remain future work.
+Open the browser view at `http://127.0.0.1:3100/` and click **Start the guided demo**. It creates a fresh, isolated sample order, so the entire exchange or refund path is repeatable without copying a token. The token is kept only in browser-tab memory. Guest sessions cannot upload images or queue paid previews even if a provider is configured. `GET /health` is public; all `/v1` endpoints require `Authorization: Bearer <token>`. For API testing, seeding still writes random 24-hour Alice/Bob tokens to ignored `demo-access.json`; the manual-token form is tucked into the page. Re-seeding rotates those tokens but preserves existing requests. Guest sessions are enabled automatically only on the loopback bind; `DEMO_GUEST_SESSIONS=true` would enable them on another bind and requires a deliberate release review. Do not expose this prototype on the public internet without that review: production identity, distributed rate limits, encryption-at-rest, and merchant integrations remain future work.
 
 For the stock-change demonstration, run `npm run catalog:stock -- v-neck 0` after quoting that product. Confirmation will reject the stale quote. Restore with `npm run catalog:stock -- v-neck 3` and generate a fresh quote.
 
@@ -59,6 +59,7 @@ Each render attempt counts toward persistent rolling-24-hour limits (default glo
 |---|---|
 | GET `/health` | Configuration status, never claims a live successful render |
 | GET `/` and `/demo/*` | Public local shopper view and clearly labeled synthetic example assets; never expose a token or key |
+| POST `/demo/session` | Optional rate-limited, isolated guest order and 24-hour token; only when guest demo is enabled; guest cannot use paid preview endpoints |
 | GET `/v1/orders` | Current user's orders |
 | GET `/v1/orders/:id` | Owned order inside the 30-day demo policy |
 | GET `/v1/orders/:id/candidates` | `reason=style`, optional `size`, `neckline`, `maxExtra` (minor units); up to three available products |

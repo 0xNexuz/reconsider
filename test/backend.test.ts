@@ -6,16 +6,17 @@ import { createApp } from '../src/app.js';
 import { Worker } from '../src/jobs.js';
 import type { Provider } from '../src/youcam.js';
 
-function fixture(enabled = false) {
+function fixture(enabled = false, demoGuestSessions = false) {
   let time = 1800000000000;
   const db = database();
   const token = session(db, 'alice', time), other = session(db, 'bob', time);
   db.prepare('INSERT INTO products(id,name,size,neckline,price,currency,stock) VALUES(?,?,?,?,?,?,?)').run('old', 'Old', 'M', 'high', 5000, 'USD', 1);
+  db.prepare('INSERT INTO products(id,name,size,neckline,price,currency,stock) VALUES(?,?,?,?,?,?,?)').run('original', 'Demo original', 'M', 'high', 5000, 'USD', 1);
   db.prepare('INSERT INTO products(id,name,size,neckline,price,currency,stock) VALUES(?,?,?,?,?,?,?)').run('new', 'New', 'M', 'v', 5500, 'USD', 1);
   db.prepare('INSERT INTO orders VALUES(?,?,?,?,?,?)').run('oa', 'alice', 'old', 5000, 'USD', time - 86400000);
   db.prepare('INSERT INTO orders VALUES(?,?,?,?,?,?)').run('ob', 'bob', 'old', 5000, 'USD', time - 86400000);
   const provider: Provider = { enabled, upload: async () => 'file', create: async () => 'task', poll: async () => ({ state: 'success', url: 'https://yce-us.s3-accelerate.amazonaws.com/result.jpg' }) };
-  const app = createApp(db, provider, { now: () => time, limits: { global: 2, user: 2 } });
+  const app = createApp(db, provider, { now: () => time, limits: { global: 2, user: 2 }, demoGuestSessions });
   const headers = { authorization: `Bearer ${token}` };
   const worker = new Worker(db, provider, () => time);
   const quote = async () => {
@@ -39,6 +40,39 @@ test('authentication, ownership, and expiry fail closed', async () => {
     assert.equal((await f.app.inject({ url: '/v1/orders/ob', headers: f.headers })).statusCode, 404);
     f.advance(86400000);
     assert.equal((await f.app.inject({ url: '/v1/orders', headers: f.headers })).statusCode, 401);
+  } finally { await f.close(); }
+});
+
+test('guided demo gives each guest a private order and cannot spend provider units', async () => {
+  const disabled = fixture();
+  try { assert.equal((await disabled.app.inject({ method: 'POST', url: '/demo/session' })).statusCode, 401); }
+  finally { await disabled.close(); }
+  const f = fixture(true, true);
+  try {
+    const first = await f.app.inject({ method: 'POST', url: '/demo/session' });
+    const second = await f.app.inject({ method: 'POST', url: '/demo/session' });
+    assert.equal(first.statusCode, 201, first.body);
+    assert.equal(second.statusCode, 201, second.body);
+    const a = first.json(), b = second.json();
+    assert.notEqual(a.orderId, b.orderId);
+    assert.notEqual(a.token, b.token);
+    assert.equal(a.providerCalls, false);
+    assert.equal((await f.app.inject('/v1/orders')).statusCode, 401);
+    const authA = { authorization: `Bearer ${a.token}` }, authB = { authorization: `Bearer ${b.token}` };
+    const ordersA = (await f.app.inject({ url: '/v1/orders', headers: authA })).json().data;
+    assert.deepEqual(ordersA.map((item: { id: string }) => item.id), [a.orderId]);
+    assert.equal((await f.app.inject({ url: `/v1/orders/${a.orderId}`, headers: authB })).statusCode, 404);
+    assert.equal((await f.app.inject({ method: 'POST', url: '/v1/images', headers: { ...authA, 'x-image-consent': 'true', 'content-type': 'image/jpeg' }, payload: Buffer.from('image') })).statusCode, 403);
+    assert.equal((await f.app.inject({ method: 'POST', url: '/v1/previews', headers: authA, payload: {} })).statusCode, 403);
+    assert.equal((await f.app.inject({ url: `/v1/orders/${a.orderId}/candidates?reason=style`, headers: authA })).statusCode, 200);
+    const quoted = await f.app.inject({ method: 'POST', url: '/v1/quotes', headers: authA, payload: { orderId: a.orderId, productId: 'new', reason: 'style' } });
+    assert.equal(quoted.statusCode, 201);
+    const exchanged = await f.app.inject({ method: 'POST', url: '/v1/requests', headers: { ...authA, 'idempotency-key': 'guest-exchange-001' }, payload: { kind: 'exchange', orderId: a.orderId, quoteId: quoted.json().data.id } });
+    assert.equal(exchanged.statusCode, 201);
+    const refunded = await f.app.inject({ method: 'POST', url: '/v1/requests', headers: { ...authB, 'idempotency-key': 'guest-refund-001' }, payload: { kind: 'refund', orderId: b.orderId } });
+    assert.equal(refunded.statusCode, 201);
+    f.advance(86400000);
+    assert.equal((await f.app.inject({ url: '/v1/orders', headers: authA })).statusCode, 401);
   } finally { await f.close(); }
 });
 test('quote ignores no client money: extra monetary fields rejected; server computes difference', async () => {

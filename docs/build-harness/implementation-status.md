@@ -18,6 +18,7 @@ This document records the implemented local prototype. Product validation and hi
 | Isolated one-task live runner | src/live-one.ts | One successful synthetic run; explicit gate and one-job quota |
 | Demonstration inventory updates | src/catalog-stock.ts | Local CLI; increments catalog version |
 | Same-origin shopper page | web/, src/app.ts | Local desktop/mobile walkthrough verified through a persisted exchange request |
+| Isolated guest demo | src/app.ts, web/app.js | One-click sample order; guest provider uploads/tasks denied; loopback default only |
 | Submission text and demo shot plan | docs/submission-draft.md | Draft only; public video and judge-accessible URLs remain absent |
 | Shopify / Loop / ReturnGO connectors | None | NOT IMPLEMENTED |
 | Payments, inventory reservations, fulfillment | None | NOT IMPLEMENTED |
@@ -39,7 +40,7 @@ There are no production accounts or externally verified orders. Seeder-generated
 
 Actual execution results belong in evidence/verification.txt. Mocked provider execution is never evidence of a real YouCam render.
 
-Verification completed: 19/19 tests passed in the shopper-view milestone; the final TypeScript/build/smoke results are recorded in [verification](../../evidence/verification.txt). A desktop/mobile browser walkthrough reached a persisted exchange receipt. One live synthetic YouCam task succeeded and produced a saved result, with a TLS limitation recorded in verification. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
+Verification completed: 20/20 tests passed after the guest-demo milestone; final TypeScript/build/smoke results are recorded in [verification](../../evidence/verification.txt). A browser walkthrough reached a persisted exchange receipt. One live synthetic YouCam task succeeded and produced a saved result, with a TLS limitation recorded in verification. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
 
 ## Ranked remaining gaps
 
