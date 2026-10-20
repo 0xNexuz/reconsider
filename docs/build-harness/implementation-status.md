@@ -1,6 +1,6 @@
 # Backend implementation status — 2026-10-20
 
-This document records the implemented local prototype. Product validation and historical research remain unchanged. No production or submission readiness is asserted.
+This document records the local prototype and the public recorded-only judge demo. Product validation and historical research remain unchanged. No production-commerce readiness is asserted. For current submission status, use the [submission map](12_submission-map.md); the ranked gaps below include historical pre-deployment notes.
 
 ## Mechanisms
 
@@ -19,7 +19,8 @@ This document records the implemented local prototype. Product validation and hi
 | Demonstration inventory updates | src/catalog-stock.ts | Local CLI; increments catalog version |
 | Same-origin shopper page | web/, src/app.ts | Three garment images and real recorded results; switching re-quotes the selected product; local walkthrough verified |
 | Isolated guest demo | src/app.ts, web/app.js | One-click sample order; guest provider uploads/tasks denied; loopback default only |
-| Submission text and demo shot plan | docs/submission-draft.md | Draft only; public video and judge-accessible URLs remain absent |
+| Public judge demo | api/handler.ts, web/, vercel.json | Deployed on Vercel with signed sample sessions, three recorded results, browser-tab request history; no new YouCam calls |
+| Submission text and demo video | docs/submission-draft.md, submission/ | Draft and 96-second video complete; public YouTube/Vimeo upload pending |
 | Shopify / Loop / ReturnGO connectors | None | NOT IMPLEMENTED |
 | Payments, inventory reservations, fulfillment | None | NOT IMPLEMENTED |
 
@@ -40,11 +41,11 @@ There are no production accounts or externally verified orders. Seeder-generated
 
 Actual execution results belong in evidence/verification.txt. Mocked provider execution is never evidence of a real YouCam render.
 
-Verification completed: 20/20 tests passed after the three-look milestone; TypeScript/build results are recorded in [verification](../../evidence/verification.txt). A browser walkthrough verified all three product references and matching recorded results. Three live synthetic YouCam tasks succeeded and produced saved results; the initial run's TLS limitation and the later verified-TLS runs are recorded in evidence. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
+Verification completed: 22/22 tests passed after the hosted milestone; TypeScript/build results are recorded in [verification](../../evidence/verification.txt). A browser walkthrough verified all three product references and matching recorded results. Three live synthetic YouCam tasks succeeded and produced saved results; the initial run's TLS limitation and the later verified-TLS runs are recorded in evidence. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
 
 ## Ranked remaining gaps
 
-P0 / High for hackathon submission: entrant eligibility, a public/source-accessible repository and license, judge-accessible working build, public 1–3 minute video, and Devpost submission are incomplete. User approval is required for external publication and submission.
+P0 / High for hackathon submission: public source, judge access, the 96-second video file, and entrant eligibility are complete. Public YouTube/Vimeo upload and Devpost entry remain. See the submission map.
 
 P0 / High technical caveat: three synthetic live results were inspected, but billing, provider retention, broader reliability, and merchant demand have not been validated. The first run inherited disabled TLS certificate verification; the two later runs used the Windows system CA with validation on. The user rotated the key before those runs.
 
@@ -58,4 +59,4 @@ No exploitable critical defect has been established by this implementation pass;
 
 ## Next action
 
-Use [the submission map](12_submission-map.md) and [draft](../submission-draft.md) to close the public repository, judging-access, video, eligibility, and rights gates. Keep the recorded result labeled; obtain fresh authorization before any further paid render or external release.
+Use [the submission map](12_submission-map.md) and [draft](../submission-draft.md) to publish the video and complete Devpost. Keep recorded results labeled; obtain fresh authorization before any further paid render.
