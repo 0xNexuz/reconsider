@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "npm run build:hosted",
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/health", "destination": "/api/handler" },
+    { "source": "/demo/session", "destination": "/api/handler" },
+    { "source": "/v1/:path*", "destination": "/api/handler" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; form-action 'self'" }
+      ]
+    }
+  ]
+}

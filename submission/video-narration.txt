@@ -1,0 +1,11 @@
+An apparel return often begins with a simple doubt: would a different style look better? Reconsider helps the shopper make that decision before requesting an exchange.
+
+This is the public, interactive judge demo. It starts with a fresh sample order. The shopper selects a return reason, and the app presents three eligible replacement garments with a price difference for each.
+
+Each product has its own reference image. Here is the terracotta round-neck blouse. The comparison pairs that reference with a real, recorded YouCam Clothes V4 result on the same synthetic shopper. Switching to the forest green collar changes both images and recalculates the quote. The cobalt V-neck is a third look.
+
+These three results came from earlier live YouCam API tasks. Switching looks here does not spend more API units or generate a new preview. The local source also includes the consent-gated upload and task workflow for an authorized live run.
+
+The shopper can request an exchange using the server-calculated quote. This public demo records the request only for the current browser tab. No payment moves, stock is not reserved, and nothing ships. A standard refund path is available without sending a photo.
+
+Reconsider connects the return reason, eligible alternatives, visual comparison, and an explicit decision. The public repository contains the source, tests, setup instructions, and evidence for the recorded YouCam integration.

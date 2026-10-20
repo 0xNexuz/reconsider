@@ -10,7 +10,7 @@ An apparel return often begins with uncertainty about style rather than a broken
 
 A shopper opens an order, chooses why the item is being returned, and sees in-stock, same-currency alternatives for a style-related return. Selecting a replacement creates a ten-minute server-calculated quote. The comparison view shows the product reference and a clearly labeled **recorded synthetic YouCam result**. When live YouCam is configured and the shopper separately consents, the app can upload a photo, create a Clothes V4 task, poll it, and show that shopper's result. The shopper may then request the exchange; stock, catalog version, price, currency, return window, and prior request state are checked again before the request is stored. A standard refund request remains available without image upload or YouCam.
 
-The current merchant catalog and orders are **simulated**. Exchange/refund requests are persisted locally, but no payment, reservation, shipping, or refund execution occurs. Appearance preview is not a size or fit prediction.
+The current merchant catalog and orders are **simulated**. The public hosted demo keeps requests only in the current browser tab; the separately runnable Fastify/SQLite backend persists sample requests locally. No payment, reservation, shipping, or refund execution occurs. Appearance preview is not a size or fit prediction.
 
 ## How we built it
 
@@ -22,7 +22,11 @@ Three live Clothes V4 tasks with generated synthetic images **succeeded** on Oct
 
 Conventional return flows can list replacements, but a shopper making a style decision still has to guess how one will look. Reconsider joins the reason, eligible alternatives, personal visualization, and a revalidated choice in one flow. Merchant value is a hypothesis; no interviews, return-rate change, or sales lift has been measured.
 
-## Demo video plan (target 2:20, public upload pending)
+## Demo video (96 seconds; public upload pending)
+
+The narrated walkthrough of the deployed app is at `submission/reconsider-demo.mp4`; its captured states and narration are in `submission/media/` and `submission/video-narration.txt`. It truthfully labels the previously recorded YouCam results and simulated commerce.
+
+### Original shot plan
 
 Use actual screen footage from the local browser view; show the recorded image only with its visible label. Do not narrate the recorded image as a new render. Do not show the API key, local bearer token, signed URL, or terminal history containing them.
 
@@ -41,10 +45,10 @@ If showing the stale-stock failure, start a fresh guest order after restoring st
 ## Submission fields still to fill
 
 - **Code repository URL:** [https://github.com/0xNexuz/reconsider](https://github.com/0xNexuz/reconsider) — public source with MIT code/documentation licensing and an explicit demo-image exclusion.
-- **Working project/test access URL or test build:** BLOCKED — no deployment or distributable test link yet. Judges must have access through the judging period.
-- **Public YouTube/Vimeo 1–3-minute video URL:** BLOCKED — no video recorded or uploaded.
-- **Screenshots:** to capture from the tested local browser flow, with visible real-versus-demo labels.
-- **Entrant registration, eligibility, team representation, special-award eligibility:** UNVERIFIED — the entrant must confirm.
+- **Working project/test access URL:** [https://reconsider-tan.vercel.app/](https://reconsider-tan.vercel.app/) — public judge demo; keep accessible through judging.
+- **Public YouTube/Vimeo 1–3-minute video URL:** PENDING — 96-second video is complete locally but has not been uploaded.
+- **Screenshots:** captured from the deployed browser flow in `submission/media/`.
+- **Entrant registration and eligibility:** user confirmed on 2026-10-20; final Devpost terms still require review.
 - **Third-party rights:** generated demo imagery and project code need a final rights/license review before public release; no copyrighted music or outside trademarks are planned.
 - **Significant update after September 29, 2026:** implementation and live synthetic test occurred October 18–19, 2026; cite the final repository history once published.
 

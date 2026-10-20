@@ -9,9 +9,11 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "build": "tsc",
+    "build:hosted": "node scripts/build-hosted.mjs",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
+    "typecheck:hosted": "tsc -p tsconfig.hosted.json",
     "smoke": "node scripts/smoke.mjs",
     "seed": "node --env-file-if-exists=.env --import tsx src/seed.ts",
     "catalog:image": "node --env-file-if-exists=.env --import tsx src/catalog-image.ts",

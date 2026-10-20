@@ -1,15 +1,17 @@
 # Submission and readiness map
 
-Official [rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) checked 2026-10-19. The deadline is November 2, 2026, 11:45 a.m. EST (5:45 p.m. Africa/Lagos). Category direction: eCommerce VTO. Judges weigh technological implementation, design, potential impact, and idea quality equally after a theme/API viability screen.
+Official [rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) checked 2026-10-20. Deadline: November 2, 2026, 11:45 a.m. EST. The judging period ends November 20, 2026. Category: eCommerce VTO.
 
-| Requirement / proof | Current state | Exact remaining action |
+| Requirement | Current state | Exact remaining action |
 |---|---|---|
-| Working app integrating a YouCam API | Local shopper flow is one-click and repeatable; one real synthetic Clothes V4 result is recorded; new live previews are disabled for guests | Keep recorded/live labels exact; assess whether the final judging build needs an authorized, budgeted live path and test that build |
-| Code repository URL with full source, assets, instructions | DONE: public [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider), MIT code/docs, demo images excluded from MIT | Recheck the final pushed commit after later changes |
-| Working project access for judges through judging period | Local only; isolated guest sessions are implemented and rate-limited | Review hosting/security, then deploy an appropriately isolated demo or provide a functioning distributable test build/link with approval |
-| English 1–3-minute end-to-end video, public YouTube/Vimeo | Script drafted; no footage or upload | Record actual UI, review claims/privacy, upload publicly with approval, verify link |
-| Text description explaining consumer/eCommerce value | [Draft prepared](../submission-draft.md) | Review final claims and paste into Devpost after app/video are final |
-| Eligibility, registration, representative and optional special prizes | UNVERIFIED | Entrant checks Devpost account, residence/age/team and any special-award evidence |
-| Third-party rights and significant post-September-29 update | Generated synthetic imagery and October implementation documented; public rights/licensing review pending | Confirm asset/code rights and selected repository license; point to published commit history |
+| Working YouCam-integrated app | [Public judge demo](https://reconsider-tan.vercel.app/) works with three genuine recorded synthetic Clothes V4 results. The local source contains the consent-gated live adapter. | Keep demo available through judging and label recorded results accurately. |
+| Public source | [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider); MIT source/docs, demo media excluded. | Verify final pushed commit. |
+| Judge access | Public Vercel app; hosted API and browser flow passed on 2026-10-20. | Recheck after final push. |
+| 1–3-minute public video | 96-second narrated walkthrough saved at `submission/reconsider-demo.mp4`. | Upload to YouTube or Vimeo and verify anonymous playback. |
+| English description and screenshots | [Draft](../submission-draft.md) and screenshots in `submission/media/`. | Complete Devpost form with URLs and media. |
+| Entrant eligibility | User confirmed registration and eligibility on 2026-10-20. | Entrant reviews final form and legally binding submission terms. |
+| Rights | Synthetic images and recorded YouCam outputs excluded from MIT in `ASSETS.md`. | Entrant confirms publication rights before final submission. |
 
-**Verdict: NOT SUBMISSION-READY.** Public source is complete, but judge-accessible app/test access, a public 1–3-minute video, and verified entrant eligibility remain P0. No app deployment or Devpost submission has occurred. The first live run's disabled TLS certificate validation limits its transport-security evidence; the runner is fixed, but a second paid run was not authorized or performed. Billing and provider retention remain unknown. Recheck official dates and requirements before submission, then obtain approval for deployment, video publication, and the final form action.
+The hosted demo uses signed isolated sessions and keeps request history only in the current browser tab. The local Fastify/SQLite app persists sample requests and supports optional authorized YouCam tasks. No real payment, stock reservation, shipping, or refund execution is claimed. No further YouCam units are authorized.
+
+**Remaining submission boundary:** public video upload and final Devpost form/submit. The final submit button accepts the organizer's legally binding rules, so the entrant must review and approve that exact action after the entry is complete.

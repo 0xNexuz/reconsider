@@ -1,6 +1,6 @@
 # Reconsider — competition readiness (October 20, 2026)
 
-This is a local prototype, not a submitted entry. The public GitHub repository still points to the earlier build until these changes are pushed.
+The working judge demo is [public on Vercel](https://reconsider-tan.vercel.app/). This is not yet a submitted entry; see the [current submission map](build-harness/12_submission-map.md) for exact remaining actions.
 
 ## What is now demonstrable
 
@@ -15,7 +15,9 @@ The official [judging criteria](https://youcam-api-skin-ai-ecommerce.devpost.com
 
 No evidence yet proves merchant demand, reduced returns, higher exchange conversion, exact garment fit, multi-shopper quality, or production commerce processing. The result is a coherent hackathon demonstration, not a production return service.
 
-## Exact remaining actions, excluding the demo video
+## Historical pre-deployment action list (superseded)
+
+The checklist below was written before the Vercel deployment and 96-second walkthrough. For the current status, use the [submission map](build-harness/12_submission-map.md).
 
 1. **Publish this tested revision to the existing public GitHub repository.** This is a separate push boundary. Recheck the committed tree for `.env`, tokens, local database, dependencies, and build output; push only after authorization, then verify the remote SHA and three images.
 2. **Make the working build accessible to judges.** Choose and approve a hosting destination and its cost/access policy. The present loopback demo cannot be opened by judges remotely. Before public exposure, replace the seed/guest bearer model with an intentionally scoped judge demo, assess storage and rate-limit behavior in that environment, keep `YOUCAM_ENABLED=false` by default, and test from an external browser. Hosting and access changes require approval.

@@ -1,8 +1,8 @@
 # Reconsider
 
-A local API for reason-aware apparel exchanges: eligible replacements, trusted price quotes, optional YouCam previews, and explicit exchange/refund requests.
+A reason-aware apparel exchange demo: eligible replacements, trusted price quotes, recorded YouCam previews, and explicit exchange/refund decisions.
 
-Public source: [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The app itself is still a local prototype; publishing this source did not deploy the browser demo.
+Try the [public judge demo](https://reconsider-tan.vercel.app/) or inspect the [public source](https://github.com/0xNexuz/reconsider). The hosted demo uses signed, isolated sample sessions and a simulated catalog; it keeps request history only in the current browser tab. The local Fastify/SQLite version below persists sample requests and contains the optional YouCam Clothes V4 integration. Neither version executes payments, refunds, stock reservation, or shipping.
 
 Source code, scripts, and documentation are [MIT licensed](LICENSE). The synthetic demo images and recorded YouCam output are [excluded from that license](ASSETS.md) and included for project evaluation.
 
@@ -92,5 +92,5 @@ npm run smoke
 
 Tests cover ownership, quote tampering, stale inventory/price, concurrent duplicate decisions, refund independence, expiration, image processing, late-result deletion, persistent quotas, bounded polling, and the provider wire contract. See [evidence](evidence/verification.txt) for recorded results and [current harness status](docs/build-harness/implementation-status.md).
 
-No Shopify, Loop, or ReturnGO account has been connected. No user funds move. No app has been deployed or submitted to Devpost. The local browser flow was tested through a persisted exchange receipt. The [Devpost draft](docs/submission-draft.md) and [submission map](docs/build-harness/12_submission-map.md) list the remaining judging access, video, eligibility, and rights gates.
+No Shopify, Loop, or ReturnGO account has been connected. No user funds move. The public judge demo is deployed, but no Devpost submission has been completed. The [Devpost draft](docs/submission-draft.md) and [submission map](docs/build-harness/12_submission-map.md) list the remaining video upload and final form actions.
 The key stays in ignored `.env`; `YOUCAM_ENABLED=false` remains the resting configuration. Any additional live task requires renewed authorization because it may consume credits.

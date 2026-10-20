@@ -8,6 +8,8 @@ let providerAvailable = false;
 let isGuest = false;
 let referenceURL = null;
 let candidates = [];
+let hostedDemo = false;
+let browserRequests = [];
 const recordedLooks = {
   'v-neck': { name: 'Cobalt V-neck', url: '/demo/results/v-neck.jpg' },
   'round-neck': { name: 'Terracotta round-neck', url: '/demo/results/round-neck.jpg' },
@@ -78,6 +80,12 @@ async function openOrder() {
     order = orders.data[0];
     if (!order) throw new Error('No demo order found. Run npm run seed first.');
     providerAvailable = !isGuest && health.youcam !== 'DISABLED';
+    hostedDemo = health.persistence === 'BROWSER_SESSION';
+    if (hostedDemo) {
+      document.querySelector('.pill').textContent = 'JUDGE DEMO';
+      $('demo-storage-note').textContent = 'This hosted demonstration keeps request history in this browser tab. It uses recorded YouCam results and makes no new provider calls.';
+      $('receipt-storage').textContent = 'In a connected retail service, the merchant would review this request. This hosted demonstration keeps it only for this browser-tab session.';
+    }
     $('order-summary').textContent = `${orderLabel()} · ${money(order.paid, order.currency)} paid. Choose why you're returning it.`;
     $('live-preview-area').hidden = !providerAvailable;
     show('explore');
@@ -91,6 +99,7 @@ async function startDemo(event) {
     const body = await response.json();
     if (!response.ok) throw new Error(messages[body.error] || 'The guided demo is unavailable. Try a seeded local token.');
     token = body.token; isGuest = true; quote = null; selected = null;
+    browserRequests = [];
     $('reason').value = 'style';
     $('candidate-area').hidden = true;
     $('candidates').replaceChildren();
@@ -202,6 +211,7 @@ async function decide(kind) {
   try {
     const payload = kind === 'refund' ? { kind, orderId: order.id } : { kind, orderId: order.id, quoteId: quote.id };
     const result = await api('/v1/requests', { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': `request-${crypto.randomUUID()}` }, body: JSON.stringify(payload) });
+    if (hostedDemo) browserRequests.unshift(result.data);
     $('receipt-summary').textContent = kind === 'refund'
       ? `A standard refund request was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`
       : `An exchange request for ${selected.name} was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`;
@@ -213,7 +223,7 @@ async function decide(kind) {
 }
 async function history() {
   try {
-    const result = await api('/v1/requests');
+    const result = hostedDemo ? { data: browserRequests } : await api('/v1/requests');
     const area = $('history'); area.replaceChildren();
     for (const item of result.data) {
       const row = document.createElement('p');
