@@ -142,3 +142,17 @@ node scripts/verify-hosted.mjs https://reconsider-tan.vercel.app — exit 0 befo
 Browser walkthrough on the public site verified the three garment references and matching recorded outputs, exchange and refund receipts, and a new guest session after the final push.
 A 96.27-second narrated MP4 made from captured states of the working deployed UI is saved in submission/reconsider-demo.mp4. It states that the three YouCam results are earlier live synthetic tasks and that commerce is simulated. It has not yet been uploaded to YouTube/Vimeo or entered into Devpost.
 Public main advanced to 4b5f4c841d38c615fa926c99f688428dcb9008da and remote main matched. Vercel production deployment dpl_9nB1AN7hiXKWrm1J8KB9M6Eh52R5 was Ready and aliased to https://reconsider-tan.vercel.app after that push. The user confirmed Devpost registration/eligibility and chose to upload the video personally. The Devpost page is currently logged out in the accessible browser.
+
+Entrant correction — 2026-10-20 (Africa/Lagos)
+The user rejected the previous narrated draft video and chose to produce their own. The draft MP4, frame list, narration text, and local narration WAV were removed from the working repository tree. Historical verification above records what was produced at the time; it must not be read as a current submission asset. The current submission map lists the entrant-produced public video as pending.
+
+Submission UX revision — 2026-10-20 (Africa/Lagos)
+The entrant requested removal of the draft video and seeded-token UI, quicker outfit switching, reason-specific routes beyond style, clearer sample-only language, and a sponsor-focused README. The old video and supporting narration/frame files were removed from the current tree, and stale screenshots showing old shipping/request language were removed or replaced. Historical Git commits may still contain the former video.
+
+node --check web/app.js — exit 0.
+npm run typecheck — exit 0.
+npm run typecheck:hosted — exit 0.
+npm test — exit 0; 23 passed, 0 failed.
+npm run build:hosted — exit 0.
+npm run build — exit 0.
+Local browser at 127.0.0.1:3101 showed no seeded-token control or shipping copy. Terracotta and forest-green hero results changed when selected. A size/fit concern changed the button to Review next step and displayed fit-specific guidance; the hosted API test confirms size, damage, and other reasons offer the refund fallback. Style alternatives showed three images, and switching from terracotta to green changed both comparison images and the quote. No YouCam units were used. Production verification remains pending until this revision is pushed and deployed.

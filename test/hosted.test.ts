@@ -38,3 +38,17 @@ test('hosted demo rejects forged sessions, altered quotes, and cross-order decis
   assert.equal(bad.status, 409);
   assert.equal((await call('/v1/requests', { method: 'POST', headers: { ...headers, 'idempotency-key': 'hosted-other-order' }, body: JSON.stringify({ kind: 'exchange', orderId: second.orderId, quoteId: quote.id }) })).status, 400);
 });
+
+test('non-style reasons offer the sample refund path without a visual claim', async () => {
+  const { token, orderId } = await (await call('/demo/session', { method: 'POST' })).json();
+  const headers = { authorization: `Bearer ${token}` };
+  for (const reason of ['size', 'damaged', 'other']) {
+    const response = await call(`/v1/orders/${orderId}/candidates?reason=${reason}`, { headers });
+    const body = await response.json();
+    assert.deepEqual(body.data, []);
+    assert.equal(body.fallback, 'STANDARD_RETURN');
+  }
+  const decision = await call('/v1/requests', { method: 'POST', headers: { ...headers, 'content-type': 'application/json', 'idempotency-key': 'hosted-refund-choice' }, body: JSON.stringify({ kind: 'refund', orderId }) });
+  assert.equal(decision.status, 201);
+  assert.equal((await decision.json()).data.kind, 'refund');
+});

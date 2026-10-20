@@ -6,23 +6,33 @@ let quote = null;
 let selected = null;
 let providerAvailable = false;
 let isGuest = false;
-let referenceURL = null;
 let candidates = [];
 let hostedDemo = false;
 let browserRequests = [];
+let selectionRun = 0;
+const productImages = new Map();
 const recordedLooks = {
   'v-neck': { name: 'Cobalt V-neck', url: '/demo/results/v-neck.jpg' },
   'round-neck': { name: 'Terracotta round-neck', url: '/demo/results/round-neck.jpg' },
   'collared': { name: 'Forest green collar', url: '/demo/results/collared.jpg' }
 };
+// Warm the three small, immutable recorded assets so switching looks does not
+// wait for a quote request or a first-time image download.
+const warmedLooks = Object.values(recordedLooks).map(look => { const image = new Image(); image.src = look.url; return image; });
+const reasonGuidance = {
+  style: { heading: 'Explore another look', detail: 'Compare eligible styles on the same synthetic shopper. A refund is still available.' },
+  size: { heading: 'Fit needs different evidence', detail: 'A virtual try-on shows appearance, not whether another size will fit. This demo cannot verify sizing, so you can save a sample refund decision instead.' },
+  damaged: { heading: 'A try-on cannot assess damage', detail: 'A retailer would need to review the item and order details. This demo cannot assess damage or arrange a replacement; you can save a sample refund decision.' },
+  other: { heading: 'Choose a clear next step', detail: 'There is no supported visual recommendation for this reason. You can save a sample refund decision without uploading a photo.' }
+};
 const messages = {
-  UNAUTHORIZED: 'That session has expired. Run npm run seed and paste the new Alice token.',
+  UNAUTHORIZED: 'That sample session has expired. Start a new guided demo.',
   REQUEST_ALREADY_EXISTS: 'This order already has a request. View its history below.',
   QUOTE_STALE: 'The item changed since you chose it. Find alternatives again for a fresh quote.',
   QUOTE_EXPIRED: 'The quote expired. Select the item again for a fresh quote.',
   YOUCAM_NOT_CONFIGURED: 'Live previews are disabled for this local demo. The recorded example remains available.',
   RENDER_BUDGET_EXHAUSTED: 'The daily preview limit has been reached. You can still request an exchange or refund.',
-  DEMO_LIMIT: 'This demo has reached its session limit. Please try later or use a seeded local token.',
+  DEMO_LIMIT: 'This demo has reached its session limit. Please try again later.',
   DEMO_NOT_SEEDED: 'The sample catalog is missing. Run npm run seed and reload.'
 };
 function notice(message, error = false) {
@@ -51,29 +61,20 @@ async function api(path, options = {}) {
   return response.status === 204 ? null : response.json();
 }
 async function imageFor(product) {
+  if (productImages.has(product.id)) return productImages.get(product.id);
   if (product.preview_available) {
     try {
       const response = await fetch(`/v1/products/${encodeURIComponent(product.id)}/image`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
-      if (response.ok) return URL.createObjectURL(await response.blob());
+      if (response.ok) { const url = URL.createObjectURL(await response.blob()); productImages.set(product.id, url); return url; }
     } catch {}
   }
-  return product.id === 'v-neck' ? '/demo/blouse.png' : null;
+  const fallback = product.id === 'v-neck' ? '/demo/blouse.png' : null;
+  if (fallback) productImages.set(product.id, fallback);
+  return fallback;
 }
 function setBusy(button, busy, label) {
   button.disabled = busy;
   button.textContent = busy ? 'Working…' : label;
-}
-async function connect(event) {
-  event.preventDefault();
-  const button = event.submitter;
-  token = $('token').value.trim();
-  isGuest = false;
-  if (!token) return;
-  setBusy(button, true, 'Open my order ↗');
-  try {
-    await openOrder();
-  } catch (error) { notice(error.message, true); }
-  finally { setBusy(button, false, 'Open my order'); }
 }
 async function openOrder() {
     const [orders, health] = await Promise.all([api('/v1/orders'), fetch('/health').then(r => r.json())]);
@@ -83,8 +84,8 @@ async function openOrder() {
     hostedDemo = health.persistence === 'BROWSER_SESSION';
     if (hostedDemo) {
       document.querySelector('.pill').textContent = 'JUDGE DEMO';
-      $('demo-storage-note').textContent = 'This hosted demonstration keeps request history in this browser tab. It uses recorded YouCam results and makes no new provider calls.';
-      $('receipt-storage').textContent = 'In a connected retail service, the merchant would review this request. This hosted demonstration keeps it only for this browser-tab session.';
+      $('demo-storage-note').textContent = 'This hosted demonstration keeps sample decisions in this browser tab. It uses recorded YouCam results and makes no new provider calls.';
+      $('receipt-storage').textContent = 'This sample decision stays in this browser tab. No retailer receives it.';
     }
     $('order-summary').textContent = `${orderLabel()} · ${money(order.paid, order.currency)} paid. Choose why you're returning it.`;
     $('live-preview-area').hidden = !providerAvailable;
@@ -97,10 +98,11 @@ async function startDemo(event) {
   try {
     const response = await fetch('/demo/session', { method: 'POST', cache: 'no-store' });
     const body = await response.json();
-    if (!response.ok) throw new Error(messages[body.error] || 'The guided demo is unavailable. Try a seeded local token.');
+    if (!response.ok) throw new Error(messages[body.error] || 'The guided demo is unavailable. Please try again later.');
     token = body.token; isGuest = true; quote = null; selected = null;
     browserRequests = [];
     $('reason').value = 'style';
+    updateReasonUI();
     $('candidate-area').hidden = true;
     $('candidates').replaceChildren();
     $('history').replaceChildren();
@@ -109,21 +111,24 @@ async function startDemo(event) {
   finally { setBusy(button, false, label); }
 }
 async function findCandidates() {
-  const button = $('find-button'); setBusy(button, true, 'Find alternatives ↗');
+  const button = $('find-button'); const label = button.textContent; setBusy(button, true, label);
   try {
     const reason = $('reason').value;
     const result = await api(`/v1/orders/${encodeURIComponent(order.id)}/candidates?reason=${encodeURIComponent(reason)}`);
     candidates = result.data;
     const container = $('candidates'); container.replaceChildren();
     $('candidate-area').hidden = false;
+    $('candidate-heading').textContent = result.data.length ? 'ELIGIBLE REPLACEMENTS' : 'YOUR NEXT STEP';
     if (!result.data.length) {
-      const message = document.createElement('p');
-      message.textContent = reason === 'style' ? 'No eligible replacement is in stock right now. A standard refund remains available.' : 'This return reason uses the standard refund path. Visual exchange suggestions are for style-related returns.';
-      container.append(message); return;
+      const guide = document.createElement('div'); guide.className = 'reason-guidance';
+      const title = document.createElement('h4'); title.textContent = reason === 'style' ? 'No alternative is available right now' : reasonGuidance[reason].heading;
+      const detail = document.createElement('p'); detail.textContent = reason === 'style' ? 'No eligible style is in stock for this sample order. You can still save a sample refund decision.' : reasonGuidance[reason].detail;
+      guide.append(title, detail); container.append(guide); return;
     }
-    for (const product of result.data) {
+    const sources = await Promise.all(result.data.map(imageFor));
+    for (const [index, product] of result.data.entries()) {
       const card = document.createElement('article'); card.className = 'candidate';
-      const source = await imageFor(product);
+      const source = sources[index];
       if (source) {
         const img = document.createElement('img'); img.src = source; img.alt = `${product.name} product reference`; img.loading = 'lazy'; card.append(img);
       } else {
@@ -140,45 +145,61 @@ async function findCandidates() {
       body.append(title, detail, price, choose); card.append(body); container.append(card);
     }
   } catch (error) { notice(error.message, true); }
-  finally { setBusy(button, false, 'Find alternatives ↗'); }
+  finally { setBusy(button, false, label); }
+}
+function updateReasonUI() {
+  const reason = $('reason').value;
+  $('reason-helper').textContent = reasonGuidance[reason].detail;
+  $('find-button').textContent = reason === 'style' ? 'Find alternatives ↗' : 'Review next step ↗';
+  $('refund-button').textContent = reason === 'style' ? 'Prefer a sample refund? Save that decision →' : 'Save a sample refund decision →';
+  $('candidate-area').hidden = true;
+  $('candidates').replaceChildren();
 }
 async function select(product, button) {
-  setBusy(button, true, 'Compare this piece');
+  const run = ++selectionRun;
+  const label = button.textContent;
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+  quote = null;
+  $('exchange-button').disabled = true;
+  $('preview-button').disabled = true;
+  $('quote-summary').textContent = `Checking ${product.name} price and availability…`;
+  const source = productImages.get(product.id);
+  const refImage = $('reference-image');
+  refImage.hidden = !source;
+  if (source) { refImage.src = source; refImage.alt = `${product.name} product reference`; }
+  let placeholder = $('reference-placeholder');
+  if (!placeholder) { placeholder = document.createElement('div'); placeholder.id = 'reference-placeholder'; placeholder.className = 'reference-placeholder'; refImage.parentElement.append(placeholder); }
+  placeholder.hidden = Boolean(source);
+  placeholder.textContent = 'Product image not available for this item.';
+  const recorded = recordedLooks[product.id];
+  $('result-figure').hidden = !recorded;
+  $('comparison-disclosure').textContent = recorded
+    ? 'This recorded YouCam result uses a synthetic shopper and this demo blouse. It is not a new preview of your photo. Appearance is not an exact-fit prediction.'
+    : 'No recorded YouCam result exists for this item. You can still request the eligible exchange. Appearance is not an exact-fit prediction.';
+  $('result-image').src = recorded?.url || '';
+  $('result-image').alt = recorded ? `Recorded YouCam result: synthetic shopper wearing ${recorded.name}` : '';
+  $('result-caption').textContent = 'RECORDED YOUCAM RESULT • SYNTHETIC EXAMPLE';
+  const switcher = $('look-switcher'); switcher.replaceChildren();
+  for (const alternative of candidates) {
+    const option = document.createElement('button');
+    option.type = 'button'; option.className = 'look-option';
+    option.textContent = recordedLooks[alternative.id]?.name || alternative.name;
+    option.setAttribute('aria-pressed', String(alternative.id === product.id));
+    option.addEventListener('click', () => { if (alternative.id !== selected?.id || !quote) select(alternative, option); });
+    switcher.append(option);
+  }
+  $('preview-status').textContent = '';
+  if ($('compare-panel').hidden) show('compare');
   try {
     const result = await api('/v1/quotes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ orderId: order.id, productId: product.id, reason: 'style' }) });
+    if (run !== selectionRun) return;
     quote = result.data; selected = product;
     $('quote-summary').textContent = `${product.name} · ${money(Math.abs(quote.difference), order.currency)} ${quote.difference >= 0 ? 'additional' : 'credit'} · Quote valid for ten minutes.`;
-    if (referenceURL) URL.revokeObjectURL(referenceURL);
-    referenceURL = await imageFor(product);
-    const refImage = $('reference-image');
-    refImage.hidden = !referenceURL;
-    if (referenceURL) { refImage.src = referenceURL; refImage.alt = `${product.name} product reference`; }
-    let placeholder = $('reference-placeholder');
-    if (!placeholder) { placeholder = document.createElement('div'); placeholder.id = 'reference-placeholder'; placeholder.className = 'reference-placeholder'; refImage.parentElement.append(placeholder); }
-    placeholder.hidden = Boolean(referenceURL);
-    placeholder.textContent = 'Product image not available for this item.';
-    const recorded = recordedLooks[product.id];
-    $('result-figure').hidden = !recorded;
-    $('comparison-disclosure').textContent = recorded
-      ? 'This recorded YouCam result uses a synthetic shopper and this demo blouse. It is not a new preview of your photo. Appearance is not an exact-fit prediction.'
-      : 'No recorded YouCam result exists for this item. You can still request the eligible exchange. Appearance is not an exact-fit prediction.';
-    $('result-image').src = recorded?.url || '';
-    $('result-image').alt = recorded ? `Recorded YouCam result: synthetic shopper wearing ${recorded.name}` : '';
-    $('result-caption').textContent = 'RECORDED YOUCAM RESULT • SYNTHETIC EXAMPLE';
-    const switcher = $('look-switcher'); switcher.replaceChildren();
-    for (const alternative of candidates) {
-      const option = document.createElement('button');
-      option.type = 'button';
-      option.className = 'look-option';
-      option.textContent = recordedLooks[alternative.id]?.name || alternative.name;
-      option.setAttribute('aria-pressed', String(alternative.id === product.id));
-      option.addEventListener('click', () => { if (alternative.id !== selected.id) select(alternative, option); });
-      switcher.append(option);
-    }
-    $('preview-status').textContent = '';
-    show('compare');
-  } catch (error) { notice(error.message, true); }
-  finally { setBusy(button, false, 'Compare this piece'); }
+    $('exchange-button').disabled = false;
+    $('preview-button').disabled = false;
+  } catch (error) { if (run === selectionRun) { show('explore'); notice(error.message, true); } }
+  finally { button.disabled = false; button.removeAttribute('aria-busy'); button.textContent = label; }
 }
 async function livePreview() {
   const file = $('photo').files[0];
@@ -213,8 +234,8 @@ async function decide(kind) {
     const result = await api('/v1/requests', { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': `request-${crypto.randomUUID()}` }, body: JSON.stringify(payload) });
     if (hostedDemo) browserRequests.unshift(result.data);
     $('receipt-summary').textContent = kind === 'refund'
-      ? `A standard refund request was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`
-      : `An exchange request for ${selected.name} was recorded for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`;
+      ? `A sample refund decision was saved for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`
+      : `A sample exchange decision for ${selected.name} was saved for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`;
     show('receipt'); await history();
   } catch (error) {
     if (['QUOTE_STALE', 'QUOTE_EXPIRED'].includes(error.code)) show('explore');
@@ -227,16 +248,15 @@ async function history() {
     const area = $('history'); area.replaceChildren();
     for (const item of result.data) {
       const row = document.createElement('p');
-      row.textContent = `${item.kind === 'exchange' ? 'Exchange' : 'Refund'} request ${item.id.slice(0, 8)}… · ${new Date(item.created_at).toLocaleString()}`;
+      row.textContent = `Sample ${item.kind === 'exchange' ? 'exchange' : 'refund'} decision ${item.id.slice(0, 8)}… · ${new Date(item.created_at).toLocaleString()}`;
       area.append(row);
     }
   } catch (error) { notice(error.message, true); }
 }
-$('connect-form').addEventListener('submit', connect);
 $('start-demo-button').addEventListener('click', startDemo);
 $('new-demo-button').addEventListener('click', startDemo);
 $('find-button').addEventListener('click', findCandidates);
-$('reason').addEventListener('change', () => { $('candidate-area').hidden = true; $('candidates').replaceChildren(); });
+$('reason').addEventListener('change', updateReasonUI);
 $('refund-button').addEventListener('click', () => decide('refund'));
 $('exchange-button').addEventListener('click', () => decide('exchange'));
 $('back-button').addEventListener('click', () => show('explore'));
@@ -249,3 +269,4 @@ document.querySelectorAll('[data-hero-look]').forEach(button => button.addEventL
   $('hero-look-image').alt = `Recorded YouCam result: synthetic shopper wearing ${look.name}`;
   document.querySelectorAll('[data-hero-look]').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
 }));
+updateReasonUI();

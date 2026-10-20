@@ -20,7 +20,7 @@ This document records the local prototype and the public recorded-only judge dem
 | Same-origin shopper page | web/, src/app.ts | Three garment images and real recorded results; switching re-quotes the selected product; local walkthrough verified |
 | Isolated guest demo | src/app.ts, web/app.js | One-click sample order; guest provider uploads/tasks denied; loopback default only |
 | Public judge demo | api/handler.ts, web/, vercel.json | Deployed on Vercel with signed sample sessions, three recorded results, browser-tab request history; no new YouCam calls |
-| Submission text and demo video | docs/submission-draft.md, submission/ | Draft and 96-second video complete; public YouTube/Vimeo upload pending |
+| Submission text and demo video | docs/submission-draft.md, submission/ | Draft updated; entrant-producing video pending; earlier draft removed from current tree |
 | Shopify / Loop / ReturnGO connectors | None | NOT IMPLEMENTED |
 | Payments, inventory reservations, fulfillment | None | NOT IMPLEMENTED |
 
@@ -45,7 +45,7 @@ Verification completed: 22/22 tests passed after the hosted milestone; TypeScrip
 
 ## Ranked remaining gaps
 
-P0 / High for hackathon submission: public source, judge access, the 96-second video file, and entrant eligibility are complete. Public YouTube/Vimeo upload and Devpost entry remain. See the submission map.
+P0 / High for hackathon submission: public source, judge access, and entrant eligibility are complete. Entrant-produced public YouTube/Vimeo video and Devpost entry remain. See the submission map.
 
 P0 / High technical caveat: three synthetic live results were inspected, but billing, provider retention, broader reliability, and merchant demand have not been validated. The first run inherited disabled TLS certificate verification; the two later runs used the Windows system CA with validation on. The user rotated the key before those runs.
 
@@ -59,4 +59,4 @@ No exploitable critical defect has been established by this implementation pass;
 
 ## Next action
 
-Use [the submission map](12_submission-map.md) and [draft](../submission-draft.md) to publish the video and complete Devpost. Keep recorded results labeled; obtain fresh authorization before any further paid render.
+Use [the submission map](12_submission-map.md) and [draft](../submission-draft.md) to receive the entrant-produced video URL and complete Devpost. Keep recorded results labeled; obtain fresh authorization before any further paid render.

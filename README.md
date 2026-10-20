@@ -1,18 +1,34 @@
 # Reconsider
 
-A reason-aware apparel exchange demo: eligible replacements, trusted price quotes, recorded YouCam previews, and explicit exchange/refund decisions.
+**See the replacement before deciding what to do with a return.** Reconsider is a hackathon prototype for apparel shoppers who are uncertain about a style. It connects a reason for returning an item to eligible alternatives, a visual comparison, a server-calculated price difference, and an explicit sample exchange or refund decision.
 
-Try the [public judge demo](https://reconsider-tan.vercel.app/) or inspect the [public source](https://github.com/0xNexuz/reconsider). The hosted demo uses signed, isolated sample sessions and a simulated catalog; it keeps request history only in the current browser tab. The local Fastify/SQLite version below persists sample requests and contains the optional YouCam Clothes V4 integration. Neither version executes payments, refunds, stock reservation, or shipping.
+[Try the public judge demo](https://reconsider-tan.vercel.app/) · [Read the submission description](docs/submission-draft.md) · [Inspect verification evidence](evidence/verification.txt)
 
-Source code, scripts, and documentation are [MIT licensed](LICENSE). The synthetic demo images and recorded YouCam output are [excluded from that license](ASSETS.md) and included for project evaluation.
+## The YouCam integration
 
-**Commerce is demonstration data.** A request does not charge/refund money, reserve stock, or ship a replacement. YouCam is disabled by default; there is no mock provider in the running application. Automated provider tests use mocked HTTP; three separately recorded synthetic live tasks succeeded.
+Perfect Corp's **YouCam Clothes V4** is the visual engine behind the comparison. The local TypeScript backend implements the real API workflow in `src/youcam.ts` and `src/jobs.ts`:
 
-The browser includes three genuine recorded YouCam Clothes V4 outputs for one synthetic shopper wearing distinct demo garments. The first succeeded on October 19, 2026, with TLS certificate validation disabled by the inherited development shell. Two further tasks succeeded on October 20 after enabling Node's Windows system certificate store, with certificate validation on. Each is a prior output, never a fresh render when a guest switches looks. See [verification](evidence/verification.txt).
+1. A shopper supplies a JPEG/PNG photo with explicit upload consent. The backend validates and normalizes it, removes image metadata, and keeps the API key server-side.
+2. After separate consent to send the image to YouCam, a bounded job uploads the shopper image and merchant garment reference through YouCam's File API.
+3. The job creates a `cloth-v4` task for `upper_body` with strict multi-person filtering, polls for completion, and exposes the result only to the owning session while it remains valid.
+4. The result appears beside the garment reference. It helps compare **appearance**; it does not predict size, fit, garment condition, or merchant acceptance.
+
+Three actual Clothes V4 tasks succeeded with synthetic inputs: the same synthetic shopper wearing a cobalt V-neck, a terracotta round-neck, and a forest-green collared blouse. Their recorded outputs are bundled so anyone can evaluate the visual decision without an API key or new API charges. The public Vercel demo **does not call YouCam when a visitor switches looks**. Its recorded results are visibly labeled. The first historical task ran with TLS certificate validation disabled by an inherited development setting; the two later tasks succeeded with TLS validation enabled. See the [sanitized evidence](evidence/verification.txt) and [provider documentation](https://docs.perfectcorp.com/reference/ai_clothes/v4.0/paths/~1s2s~1v2.0~1task~1cloth-v4/post).
+
+Automated tests mock provider HTTP to cover the upload/task/poll contract and failure cases. Those tests are separate from the three real tasks. No further provider units are required to run the judge demo.
+
+## What the demo does
+
+- **Style concern:** shows three in-stock sample alternatives, each with a garment image and matching recorded YouCam result. Selecting a look checks the price difference and creates a ten-minute quote. The image switches immediately while the quote is checked.
+- **Size or fit:** explains that a virtual try-on cannot verify fit, then offers a sample refund decision rather than suggesting an unsupported size change.
+- **Damaged item:** explains that a retailer must assess the damage; the demo offers a sample refund decision and does not pretend the image diagnoses damage.
+- **Other reason:** gives a clear sample refund route without requiring a photo.
+
+The shopper can save an exchange or refund **decision**. The public site uses a signed, isolated sample session and keeps its decision history only in the current browser tab. The separately runnable Fastify/SQLite application persists sample requests locally and contains the consent-gated live YouCam adapter. Neither version places an order, charges or refunds money, reserves stock, contacts a retailer, or arranges fulfillment. Merchant impact and real-shopper performance have not been measured.
 
 ## Run locally
 
-Requires Node 24.x (uses Node's experimental built-in SQLite), npm, and a writable persistent disk. Run commands from this directory:
+Requires Node.js 24.x, npm, and a writable local disk. From the repository root:
 
 ```powershell
 npm ci
@@ -22,75 +38,46 @@ npm run build
 npm start
 ```
 
-On macOS/Linux, replace the conditional PowerShell copy with `test -f .env || cp .env.example .env`; the `npm` commands are the same. Seeding installs all three bundled synthetic garment references into the local catalog. Keep `YOUCAM_ENABLED=false` for the recorded-example demo. The server binds to `127.0.0.1:3100` by default.
+Open `http://127.0.0.1:3100/` and choose **Start the guided demo**. The guest path creates a new sample order and cannot upload images or spend YouCam units. Keep `YOUCAM_ENABLED=false` for this recorded-look walkthrough. On macOS/Linux, use `test -f .env || cp .env.example .env` instead of the PowerShell copy command.
 
-Open the browser view at `http://127.0.0.1:3100/` and click **Start the guided demo**. It creates a fresh, isolated sample order, so the entire exchange or refund path is repeatable without copying a token. The token is kept only in browser-tab memory. Guest sessions cannot upload images or queue paid previews even if a provider is configured. `GET /health` is public; all `/v1` endpoints require `Authorization: Bearer <token>`. For API testing, seeding still writes random 24-hour Alice/Bob tokens to ignored `demo-access.json`; the manual-token form is tucked into the page. Re-seeding rotates those tokens but preserves existing requests. Guest sessions are enabled automatically only on the loopback bind; `DEMO_GUEST_SESSIONS=true` would enable them on another bind and requires a deliberate release review. Do not expose this prototype on the public internet without that review: production identity, distributed rate limits, encryption-at-rest, and merchant integrations remain future work.
+`npm run seed` also writes short-lived Alice/Bob API tokens to ignored `demo-access.json` for command-line testing; they are not needed in the browser UI. `GET /health` is public, while `/v1` routes require a bearer token. Guest-session creation is enabled automatically only on the loopback bind. The local server is a prototype, not a public multi-tenant service.
 
-For the stock-change demonstration, run `npm run catalog:stock -- v-neck 0` after quoting that product. Confirmation will reject the stale quote. Restore with `npm run catalog:stock -- v-neck 3` and generate a fresh quote.
+To exercise stale-quote protection locally, quote `v-neck`, then run `npm run catalog:stock -- v-neck 0` before confirmation. The server rejects the stale quote. Restore with `npm run catalog:stock -- v-neck 3` and generate a fresh quote.
+
+## Optional live API path
+
+A live run can use API units and requires a licensed garment reference, a consented shopper photo, and a configured key. Keep the key only in ignored `.env` as `YOUCAM_API_KEY`; never commit it. First run the offline preflight, which makes **no** YouCam request:
 
 ```powershell
-$access = Get-Content .\demo-access.json | ConvertFrom-Json
-$headers = @{ Authorization = "Bearer $($access.alice)" }
-Invoke-RestMethod http://127.0.0.1:3100/v1/orders -Headers $headers
-$quote = Invoke-RestMethod http://127.0.0.1:3100/v1/quotes -Method Post -Headers $headers -ContentType application/json -Body '{"orderId":"order-alice","productId":"v-neck","reason":"style"}'
-$headers['Idempotency-Key'] = 'example-exchange-001'
-$body = @{ kind='exchange'; orderId='order-alice'; quoteId=$quote.data.id } | ConvertTo-Json
-Invoke-RestMethod http://127.0.0.1:3100/v1/requests -Method Post -Headers $headers -ContentType application/json -Body $body
+npm run integration:check -- C:\path\garment.jpg C:\path\shopper.jpg
 ```
 
-The sample quote difference is 500 USD cents. The response explicitly reports no payment execution or inventory reservation. A second request for the same order is rejected; replaying the same idempotency key and payload returns the original result. This prototype models one returnable item per order.
+Import a suitable garment reference with `npm run catalog:image -- v-neck C:\path\garment.jpg`. When an authorized live run is intended, set `YOUCAM_ENABLED=true` locally, use a non-guest authenticated session, upload the shopper image with `X-Image-Consent: true`, and separately consent when creating a preview job. The worker limits attempts and polling, avoids automatic retry after an ambiguous task-creation POST, and expires local image/result access. The public judge deployment does not expose this path or the key. No additional live run is part of the current submission plan.
 
-## YouCam integration
+## Architecture and safeguards
 
-Before enabling paid calls, check a licensed garment photo and a consented shopper photo locally with `npm run integration:check -- C:\path\garment.jpg C:\path\shopper.jpg`. This command normalizes both in memory, reports only key presence and the enabled flag, and makes no YouCam request. It cannot establish that the pose, rights, or consent are suitable; review those separately. The key belongs only in this project's ignored `.env` file under `YOUCAM_API_KEY=`. Leave `YOUCAM_ENABLED=false` until the specific live-render run is authorized. Never paste the key into chat, source, screenshots, or logs.
-
-1. Set `YOUCAM_API_KEY` in local `.env`, and `YOUCAM_ENABLED=true` only when ready for calls that may consume credits. Never commit this file.
-2. Attach a licensed, front-facing upper-body garment image to a catalog product:
-   `npm run catalog:image -- v-neck C:\path\licensed-blouse.jpg`
-3. Create a fresh quote after importing the image (catalog changes invalidate old quotes).
-4. Upload a consented photo as raw JPEG/PNG bytes to `POST /v1/images`, including `X-Image-Consent: true` and bearer auth. Images are validated, re-encoded to JPEG, and EXIF stripped. Accepted bounds: at least 512px long side and 384px short side, at most 4096px on either side, under 8 MiB.
-5. `POST /v1/previews` with an idempotency header and `{"quoteId":"...","assetId":"...","consent":true}`. Consent here specifically covers transmission to YouCam; merely uploading locally does not transmit the photo.
-6. Poll your `GET /v1/previews/:id`. The worker uploads source/reference bytes, submits `cloth-v4` with `upper_body` and strict multi-person filtering, then checks status every 10 seconds, at most 30 times.
-
-Source references: [V4 task API](https://docs.perfectcorp.com/reference/ai_clothes/v4.0/paths/~1s2s~1v2.0~1task~1cloth-v4/post), [file/task workflow](https://docs.perfectcorp.com/reference/ai_clothes/section/overview). One synthetic live output was visually inspected, but broader quality, billing, regional storage hosts, and provider retention have not been verified. Storage destinations are restricted to two documented US S3 hosts; unknown hosts fail closed. Do not broaden the allowlist without verifying provider documentation.
-
-Photos and result links expire locally after one hour. DELETE `/v1/images/:id` clears the local blob and tombstones dependent jobs, preventing late writes from restoring results. This is logical deletion, not forensic secure erasure of SQLite pages, WAL files, or backups. It does not delete data already sent to YouCam or revoke result links already copied by a user. There is no raw-photo serving endpoint.
-
-Each render attempt counts toward persistent rolling-24-hour limits (default global 20 / user 5), including failed attempts. The worker never automatically repeats a task-creation POST after an ambiguous timeout or process crash. Interrupted submissions become `FAILED`; the user may explicitly start a new attempt, potentially spending credits again. Polling GET errors are retried within the fixed limit. Run exactly one server/worker instance per database; multi-process scheduling is not supported.
-
-## API contract
-
-| Method/path | Input / behavior |
+| Component | Responsibility |
 |---|---|
-| GET `/health` | Configuration status, never claims a live successful render |
-| GET `/` and `/demo/*` | Public local shopper view and clearly labeled synthetic example assets; never expose a token or key |
-| POST `/demo/session` | Optional rate-limited, isolated guest order and 24-hour token; only when guest demo is enabled; guest cannot use paid preview endpoints |
-| GET `/v1/orders` | Current user's orders |
-| GET `/v1/orders/:id` | Owned order inside the 30-day demo policy |
-| GET `/v1/orders/:id/candidates` | `reason=style`, optional `size`, `neckline`, `maxExtra` (minor units); up to three available products |
-| GET `/v1/products/:id/image` | JPEG reference image for a catalog item when the shopper has an active order in the same currency; fetch with bearer auth and display as a local blob |
-| POST `/v1/quotes` | `orderId`, `productId`, `reason: style`; 10-minute server quote |
-| POST `/v1/requests` | `kind: exchange`, `orderId`, `quoteId`; or `kind: refund`, `orderId`; idempotency header required |
-| GET `/v1/requests` | Owned persisted requests |
-| POST `/v1/images` | Raw image + consent header; max five active images per user |
-| DELETE `/v1/images/:id` | Owned image deletion and job tombstones |
-| POST `/v1/previews` | Quote, image, explicit provider consent; idempotency header required |
-| GET `/v1/previews/:id` | Owned job state, error, and temporary result URL on success |
+| Public Vercel function, `api/handler.ts` | Signed sample sessions, simulated catalog, server-calculated quotes, recorded-only flow; no provider credentials or persistent merchant records |
+| Local Fastify API, `src/app.ts` | Authenticated orders, reason routing, quote/request checks, image consent, and owner-qualified access |
+| Local SQLite domain and worker, `src/domain.ts`, `src/jobs.ts` | Return-window, price, stock and version checks; idempotent decisions; bounded provider jobs |
+| YouCam adapter, `src/youcam.ts` | Server-side File API upload, Clothes V4 task creation, and result polling |
+| Browser view, `web/` | Three matching recorded looks, honest reason guidance, and clear sample decisions |
 
-No arbitrary remote URLs are accepted as image inputs. Client monetary fields and unknown JSON properties are rejected. Prices use integer minor units. Quotes revalidate price, currency, version, stock, return window, and existing request state at confirmation. Inventory availability is a snapshot; final merchant fulfillment must revalidate/reserve stock later. Size is a shopper preference, not a fit prediction.
-
-Errors use `{ "error": "CODE" }`: 400 invalid input/consent, 401 unauthorized, 404 missing or not owned, 409 stale quote/already requested, 422 invalid image, 429 limit, 503 provider unavailable. Provider diagnostic bodies and API keys are not logged or returned.
+Local image uploads are re-encoded to JPEG with metadata removed. The server restricts remote storage hosts, applies per-user and global render limits, and does not automatically repeat a potentially accepted provider task after a timeout. Deletion tombstones dependent jobs but is not forensic erasure of SQLite pages or deletion of images already sent to YouCam. Production identity, merchant authorization, managed storage, payment, and fulfillment integrations remain outside this prototype.
 
 ## Verify
 
 ```powershell
 npm run typecheck
+npm run typecheck:hosted
 npm test
 npm run build
-npm run smoke
+npm run build:hosted
 ```
 
-Tests cover ownership, quote tampering, stale inventory/price, concurrent duplicate decisions, refund independence, expiration, image processing, late-result deletion, persistent quotas, bounded polling, and the provider wire contract. See [evidence](evidence/verification.txt) for recorded results and [current harness status](docs/build-harness/implementation-status.md).
+The suite covers ownership, quote tampering, stale stock/price, duplicate decisions, non-style fallback, image consent and metadata handling, provider protocol with mocked HTTP, job limits, and hosted-session token integrity. The [verification log](evidence/verification.txt) distinguishes mocked checks, real synthetic provider results, and browser observations. The [submission map](docs/build-harness/12_submission-map.md) tracks the remaining Devpost actions.
 
-No Shopify, Loop, or ReturnGO account has been connected. No user funds move. The public judge demo is deployed, but no Devpost submission has been completed. The [Devpost draft](docs/submission-draft.md) and [submission map](docs/build-harness/12_submission-map.md) list the remaining video upload and final form actions.
-The key stays in ignored `.env`; `YOUCAM_ENABLED=false` remains the resting configuration. Any additional live task requires renewed authorization because it may consume credits.
+## License and media
+
+Code and documentation are [MIT licensed](LICENSE). Synthetic input images, recorded YouCam outputs, and project screenshots are [excluded from that grant](ASSETS.md) and included for evaluation. No real shopper photos or API credentials are committed. The required submission video is being produced separately by the entrant and is not part of this repository.

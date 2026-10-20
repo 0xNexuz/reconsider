@@ -17,7 +17,7 @@ No evidence yet proves merchant demand, reduced returns, higher exchange convers
 
 ## Historical pre-deployment action list (superseded)
 
-The checklist below was written before the Vercel deployment and 96-second walkthrough. For the current status, use the [submission map](build-harness/12_submission-map.md).
+The checklist below was written before the Vercel deployment and later UX revision. For the current status, use the [submission map](build-harness/12_submission-map.md).
 
 1. **Publish this tested revision to the existing public GitHub repository.** This is a separate push boundary. Recheck the committed tree for `.env`, tokens, local database, dependencies, and build output; push only after authorization, then verify the remote SHA and three images.
 2. **Make the working build accessible to judges.** Choose and approve a hosting destination and its cost/access policy. The present loopback demo cannot be opened by judges remotely. Before public exposure, replace the seed/guest bearer model with an intentionally scoped judge demo, assess storage and rate-limit behavior in that environment, keep `YOUCAM_ENABLED=false` by default, and test from an external browser. Hosting and access changes require approval.

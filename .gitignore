@@ -8,6 +8,3 @@ public/
 data/
 *.sqlite*
 demo-access.json
-
-.vercel
-submission/*.wav

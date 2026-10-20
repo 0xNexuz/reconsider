@@ -1,55 +1,38 @@
-# Reconsider — Devpost draft (not submitted)
+# Reconsider — Devpost entry draft
 
-## Title and short pitch
+**Status:** prepared, not submitted. The entrant is making a new video; no video file or public video URL is in this repository.
 
-**Reconsider — See the replacement before you choose it.**
+## Title and pitch
 
-An apparel return often begins with uncertainty about style rather than a broken product. Reconsider turns that moment into a clearer choice: it checks eligible alternatives for a return reason, shows a YouCam Clothes V4 appearance preview, revalidates price and stock, and records an explicit exchange or refund request.
+**Reconsider — see the replacement before you decide.**
+
+When an apparel purchase feels wrong, shoppers often choose between an unseen alternative and a refund. Reconsider connects a style-related return to eligible replacements, a YouCam-powered visual comparison, an authoritative price quote, and a clear sample decision.
+
+## Inspiration
+
+A return is not always about a defective product. Sometimes the piece simply does not feel right. A product listing can show another blouse, but it cannot show the same shopper wearing each alternative. We built Reconsider to make that comparison more concrete at the moment a shopper is deciding what to do next.
 
 ## What it does
 
-A shopper opens an order, chooses why the item is being returned, and sees in-stock, same-currency alternatives for a style-related return. Selecting a replacement creates a ten-minute server-calculated quote. The comparison view shows the product reference and a clearly labeled **recorded synthetic YouCam result**. When live YouCam is configured and the shopper separately consents, the app can upload a photo, create a Clothes V4 task, poll it, and show that shopper's result. The shopper may then request the exchange; stock, catalog version, price, currency, return window, and prior request state are checked again before the request is stored. A standard refund request remains available without image upload or YouCam.
+The public [judge demo](https://reconsider-tan.vercel.app/) starts a fresh sample order. For a style concern, it shows three available garments, each with a product reference image and a matching **previously recorded real YouCam Clothes V4 result** on the same synthetic shopper. Switching garments changes the visual immediately while the server checks a new ten-minute price quote. The shopper can then save a sample exchange or refund decision.
 
-The current merchant catalog and orders are **simulated**. The public hosted demo keeps requests only in the current browser tab; the separately runnable Fastify/SQLite backend persists sample requests locally. No payment, reservation, shipping, or refund execution occurs. Appearance preview is not a size or fit prediction.
+For size/fit, damage, and other reasons, the app gives reason-specific guidance and a sample refund path. It does not present a virtual try-on as evidence of fit or damage. The catalog, order, and decisions are demonstration data. The public site keeps decision history only in the current browser tab. No retailer receives the decision; no payment, refund, reservation, or fulfillment occurs.
 
-## How we built it
+## How we built it and used YouCam
 
-The application uses Node 24, TypeScript, Fastify, Node SQLite, sharp, and a responsive browser view. The server owns policy and money calculations, normalizes photos to JPEG without metadata, stores expiring local assets, and queues bounded render jobs. The YouCam adapter uploads source and garment images through the File API, creates a Clothes V4 task, and polls for the result. Idempotency keys and database constraints prevent duplicate return requests; interrupted task creation is not automatically retried because the external POST may have been accepted and may use units.
+The locally runnable application uses TypeScript, Node 24, Fastify, SQLite, sharp, and a browser UI. Its server-side YouCam adapter uploads a consented shopper photo and merchant garment reference through the File API, creates a Clothes V4 `upper_body` task with strict multi-person filtering, polls for completion, and exposes the result to the owning session. Jobs have bounded polling and quotas, and ambiguous task-creation failures are not automatically retried. Three live synthetic tasks succeeded and produced the cobalt, terracotta, and green recorded examples used in the public demo. The first historical task had disabled TLS certificate verification because of an inherited shell setting; the two later tasks verified TLS. Provider HTTP tests are mocked and identified separately from those real tasks.
 
-Three live Clothes V4 tasks with generated synthetic images **succeeded** on October 19–20, 2026. The same synthetic shopper appears in a blue V-neck, rust round-neck, and green collared blouse; each output was saved and visually inspected. The first run inherited disabled TLS certificate verification from the development shell. The two subsequent runs used the trusted Windows system certificate store and verified TLS. Mock HTTP contract tests and the local browser flow provide additional, separately labeled evidence.
+The public Vercel build uses signed sample sessions, a simulated catalog, server-calculated quotes, and the three saved YouCam outputs. It deliberately cannot initiate new provider jobs or consume API units. The repository includes the full locally runnable integration, setup instructions, tests, and sanitized evidence.
 
-## Why it matters
+## What we learned and what comes next
 
-Conventional return flows can list replacements, but a shopper making a style decision still has to guess how one will look. Reconsider joins the reason, eligible alternatives, personal visualization, and a revalidated choice in one flow. Merchant value is a hypothesis; no interviews, return-rate change, or sales lift has been measured.
+YouCam's visual result is useful for comparing appearance, but it is not a fit prediction. A responsible return flow must keep that distinction clear and must not imply that saving a demo decision changes a real order. Merchant demand, exchange conversion, multi-shopper quality, and production reliability remain unmeasured. A real merchant pilot would need identity, order authorization, inventory reservation, retention controls, and fulfillment integration.
 
-## Demo video (96 seconds; public upload pending)
+## Submission links and media
 
-The narrated walkthrough of the deployed app is at `submission/reconsider-demo.mp4`; its captured states and narration are in `submission/media/` and `submission/video-narration.txt`. It truthfully labels the previously recorded YouCam results and simulated commerce.
+- **Working app:** [https://reconsider-tan.vercel.app/](https://reconsider-tan.vercel.app/)
+- **Public code:** [https://github.com/0xNexuz/reconsider](https://github.com/0xNexuz/reconsider)
+- **Screenshots:** `submission/media/` contains revised hero, alternatives, and matching-comparison captures. Capture a fresh sample-decision screen before uploading screenshots to Devpost.
+- **Public 1–3-minute video:** entrant-produced; URL pending. Show the functioning app and explain that Clothes V4 produced the three previously recorded synthetic results. Keep the recorded label visible. Do not show credentials, private photos, bearer tokens, or signed URLs.
 
-### Original shot plan
-
-Use actual screen footage from the local browser view; show the recorded image only with its visible label. Do not narrate the recorded image as a new render. Do not show the API key, local bearer token, signed URL, or terminal history containing them.
-
-| Time | Footage | Narration point |
-|---|---|---|
-| 0:00–0:15 | Hero and return problem | “A style return is often a decision made without seeing the alternative.” |
-| 0:15–0:38 | Click Start the guided demo; select style | “Reconsider starts from an isolated sample order and the shopper's reason.” |
-| 0:38–0:58 | In-stock alternatives and price difference | “Eligibility and differences come from the server, not browser-entered prices.” |
-| 0:58–1:23 | Switch among three product references and matching labeled recorded results | “YouCam Clothes V4 powers this visual comparison. These three results came from earlier synthetic live runs, not a new API call during this demo.” |
-| 1:23–1:43 | Request exchange and receipt | “The quote is rechecked; the request is stored, but nothing is charged or shipped.” |
-| 1:43–2:00 | Fresh order or edited footage of refund path | “A standard refund remains available without sending a photo.” |
-| 2:00–2:20 | Code/evidence view and closing | “Three real API tasks succeeded; local tests cover ownership, stale stock, and duplicate requests. Merchant impact remains to be validated.” |
-
-If showing the stale-stock failure, start a fresh guest order after restoring stock; never splice UI footage so it falsely implies a single uninterrupted successful flow.
-
-## Submission fields still to fill
-
-- **Code repository URL:** [https://github.com/0xNexuz/reconsider](https://github.com/0xNexuz/reconsider) — public source with MIT code/documentation licensing and an explicit demo-image exclusion.
-- **Working project/test access URL:** [https://reconsider-tan.vercel.app/](https://reconsider-tan.vercel.app/) — public judge demo; keep accessible through judging.
-- **Public YouTube/Vimeo 1–3-minute video URL:** PENDING — 96-second video is complete locally but has not been uploaded.
-- **Screenshots:** captured from the deployed browser flow in `submission/media/`.
-- **Entrant registration and eligibility:** user confirmed on 2026-10-20; final Devpost terms still require review.
-- **Third-party rights:** generated demo imagery and project code need a final rights/license review before public release; no copyrighted music or outside trademarks are planned.
-- **Significant update after September 29, 2026:** implementation and live synthetic test occurred October 18–19, 2026; cite the final repository history once published.
-
-Do not paste credentials, signed URLs, or private images into the Devpost form. Do not submit this draft until every BLOCKED field is resolved and the live/test claims match the actual accessible build.
+The entrant confirmed registration and eligibility on October 20, 2026. The final Devpost form and legally binding submission terms still require their review. The [submission map](build-harness/12_submission-map.md) records the exact remaining actions.
