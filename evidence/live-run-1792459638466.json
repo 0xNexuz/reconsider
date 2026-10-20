@@ -1,0 +1,9 @@
+{
+  "startedAt": "2026-10-20T01:27:13.700Z",
+  "finishedAt": "2026-10-20T01:27:18.466Z",
+  "testInputs": "SYNTHETIC",
+  "provider": "YouCam Clothes V4",
+  "attemptsQueued": 1,
+  "state": "FAILED",
+  "error": "PROVIDER_NETWORK_ERROR"
+}

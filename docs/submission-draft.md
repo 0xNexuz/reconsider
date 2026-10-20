@@ -16,7 +16,7 @@ The current merchant catalog and orders are **simulated**. Exchange/refund reque
 
 The application uses Node 24, TypeScript, Fastify, Node SQLite, sharp, and a responsive browser view. The server owns policy and money calculations, normalizes photos to JPEG without metadata, stores expiring local assets, and queues bounded render jobs. The YouCam adapter uploads source and garment images through the File API, creates a Clothes V4 task, and polls for the result. Idempotency keys and database constraints prevent duplicate return requests; interrupted task creation is not automatically retried because the external POST may have been accepted and may use units.
 
-One live Clothes V4 task with generated synthetic images **succeeded** on October 19, 2026, and the output was saved and visually inspected. Its first run inherited disabled TLS certificate verification from the development shell; the runner has since been fixed, but no second paid task was submitted. Mock HTTP contract tests and the local browser flow provide additional, separately labeled evidence.
+Three live Clothes V4 tasks with generated synthetic images **succeeded** on October 19–20, 2026. The same synthetic shopper appears in a blue V-neck, rust round-neck, and green collared blouse; each output was saved and visually inspected. The first run inherited disabled TLS certificate verification from the development shell. The two subsequent runs used the trusted Windows system certificate store and verified TLS. Mock HTTP contract tests and the local browser flow provide additional, separately labeled evidence.
 
 ## Why it matters
 
@@ -31,10 +31,10 @@ Use actual screen footage from the local browser view; show the recorded image o
 | 0:00–0:15 | Hero and return problem | “A style return is often a decision made without seeing the alternative.” |
 | 0:15–0:38 | Click Start the guided demo; select style | “Reconsider starts from an isolated sample order and the shopper's reason.” |
 | 0:38–0:58 | In-stock alternatives and price difference | “Eligibility and differences come from the server, not browser-entered prices.” |
-| 0:58–1:23 | Product reference beside labeled recorded result | “YouCam Clothes V4 powers the visual comparison. This example was generated in one earlier synthetic live run.” |
+| 0:58–1:23 | Switch among three product references and matching labeled recorded results | “YouCam Clothes V4 powers this visual comparison. These three results came from earlier synthetic live runs, not a new API call during this demo.” |
 | 1:23–1:43 | Request exchange and receipt | “The quote is rechecked; the request is stored, but nothing is charged or shipped.” |
 | 1:43–2:00 | Fresh order or edited footage of refund path | “A standard refund remains available without sending a photo.” |
-| 2:00–2:20 | Code/evidence view and closing | “One real API task succeeded; the local tests cover ownership, stale stock, and duplicate requests. Merchant impact remains to be validated.” |
+| 2:00–2:20 | Code/evidence view and closing | “Three real API tasks succeeded; local tests cover ownership, stale stock, and duplicate requests. Merchant impact remains to be validated.” |
 
 If showing the stale-stock failure, start a fresh guest order after restoring stock; never splice UI footage so it falsely implies a single uninterrupted successful flow.
 

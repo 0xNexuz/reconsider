@@ -7,6 +7,12 @@ let selected = null;
 let providerAvailable = false;
 let isGuest = false;
 let referenceURL = null;
+let candidates = [];
+const recordedLooks = {
+  'v-neck': { name: 'Cobalt V-neck', url: '/demo/results/v-neck.jpg' },
+  'round-neck': { name: 'Terracotta round-neck', url: '/demo/results/round-neck.jpg' },
+  'collared': { name: 'Forest green collar', url: '/demo/results/collared.jpg' }
+};
 const messages = {
   UNAUTHORIZED: 'That session has expired. Run npm run seed and paste the new Alice token.',
   REQUEST_ALREADY_EXISTS: 'This order already has a request. View its history below.',
@@ -42,7 +48,7 @@ async function api(path, options = {}) {
   }
   return response.status === 204 ? null : response.json();
 }
-async function imageFor(product, img) {
+async function imageFor(product) {
   if (product.preview_available) {
     try {
       const response = await fetch(`/v1/products/${encodeURIComponent(product.id)}/image`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
@@ -98,6 +104,7 @@ async function findCandidates() {
   try {
     const reason = $('reason').value;
     const result = await api(`/v1/orders/${encodeURIComponent(order.id)}/candidates?reason=${encodeURIComponent(reason)}`);
+    candidates = result.data;
     const container = $('candidates'); container.replaceChildren();
     $('candidate-area').hidden = false;
     if (!result.data.length) {
@@ -114,7 +121,7 @@ async function findCandidates() {
         const placeholder = document.createElement('div'); placeholder.className = 'candidate-placeholder'; placeholder.textContent = 'Product image not available'; card.append(placeholder);
       }
       const body = document.createElement('div'); body.className = 'candidate-body';
-      if (product.id === 'v-neck') {
+      if (recordedLooks[product.id]) {
         const badge = document.createElement('span'); badge.className = 'candidate-badge'; badge.textContent = 'Recorded try-on available'; body.append(badge);
       }
       const title = document.createElement('h4'); title.textContent = product.name;
@@ -141,14 +148,24 @@ async function select(product, button) {
     if (!placeholder) { placeholder = document.createElement('div'); placeholder.id = 'reference-placeholder'; placeholder.className = 'reference-placeholder'; refImage.parentElement.append(placeholder); }
     placeholder.hidden = Boolean(referenceURL);
     placeholder.textContent = 'Product image not available for this item.';
-    const recorded = product.id === 'v-neck';
+    const recorded = recordedLooks[product.id];
     $('result-figure').hidden = !recorded;
     $('comparison-disclosure').textContent = recorded
       ? 'This recorded YouCam result uses a synthetic shopper and this demo blouse. It is not a new preview of your photo. Appearance is not an exact-fit prediction.'
       : 'No recorded YouCam result exists for this item. You can still request the eligible exchange. Appearance is not an exact-fit prediction.';
-    $('result-image').src = '/demo/recorded-result.jpg';
-    $('result-image').alt = 'Recorded synthetic YouCam try-on example';
+    $('result-image').src = recorded?.url || '';
+    $('result-image').alt = recorded ? `Recorded YouCam result: synthetic shopper wearing ${recorded.name}` : '';
     $('result-caption').textContent = 'RECORDED YOUCAM RESULT • SYNTHETIC EXAMPLE';
+    const switcher = $('look-switcher'); switcher.replaceChildren();
+    for (const alternative of candidates) {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'look-option';
+      option.textContent = recordedLooks[alternative.id]?.name || alternative.name;
+      option.setAttribute('aria-pressed', String(alternative.id === product.id));
+      option.addEventListener('click', () => { if (alternative.id !== selected.id) select(alternative, option); });
+      switcher.append(option);
+    }
     $('preview-status').textContent = '';
     show('compare');
   } catch (error) { notice(error.message, true); }
@@ -215,3 +232,10 @@ $('exchange-button').addEventListener('click', () => decide('exchange'));
 $('back-button').addEventListener('click', () => show('explore'));
 $('preview-button').addEventListener('click', livePreview);
 $('restart-button').addEventListener('click', history);
+document.querySelectorAll('[data-hero-look]').forEach(button => button.addEventListener('click', () => {
+  const look = recordedLooks[button.dataset.heroLook];
+  if (!look) return;
+  $('hero-look-image').src = look.url;
+  $('hero-look-image').alt = `Recorded YouCam result: synthetic shopper wearing ${look.name}`;
+  document.querySelectorAll('[data-hero-look]').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+}));

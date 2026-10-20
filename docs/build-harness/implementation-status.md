@@ -1,4 +1,4 @@
-# Backend implementation status — 2026-10-19
+# Backend implementation status — 2026-10-20
 
 This document records the implemented local prototype. Product validation and historical research remain unchanged. No production or submission readiness is asserted.
 
@@ -10,14 +10,14 @@ This document records the implemented local prototype. Product validation and hi
 | Policy filtering and authoritative quote | src/domain.ts, src/app.ts | Implemented; one item per demonstration order |
 | Idempotent decisions | src/domain.ts | SQLite transaction plus unique order/key constraints |
 | Image validation, metadata removal, expiry | src/images.ts, src/jobs.ts | Logical deletion; no secure-erasure claim |
-| YouCam upload / V4 task / polling | src/youcam.ts | One live synthetic task SUCCEEDED; broader reliability UNVERIFIED |
+| YouCam upload / V4 task / polling | src/youcam.ts | Three live synthetic tasks SUCCEEDED; broader reliability UNVERIFIED |
 | Durable jobs, budget and late-result suppression | src/jobs.ts | Implemented; single-process worker only |
 | Merchant reference-image import | src/catalog-image.ts | Local CLI; no image rights assumed |
 | Protected garment image retrieval | src/app.ts | Implemented; owner/order and active-stock gates tested locally |
 | Offline image/config preflight | src/integration-check.ts | Implemented; makes no provider request and never prints the key |
-| Isolated one-task live runner | src/live-one.ts | One successful synthetic run; explicit gate and one-job quota |
+| Isolated one-task live runner | src/live-one.ts | Three successful synthetic runs across separately authorized invocations; explicit gate and one-job quota per invocation |
 | Demonstration inventory updates | src/catalog-stock.ts | Local CLI; increments catalog version |
-| Same-origin shopper page | web/, src/app.ts | Local desktop/mobile walkthrough verified through a persisted exchange request |
+| Same-origin shopper page | web/, src/app.ts | Three garment images and real recorded results; switching re-quotes the selected product; local walkthrough verified |
 | Isolated guest demo | src/app.ts, web/app.js | One-click sample order; guest provider uploads/tasks denied; loopback default only |
 | Submission text and demo shot plan | docs/submission-draft.md | Draft only; public video and judge-accessible URLs remain absent |
 | Shopify / Loop / ReturnGO connectors | None | NOT IMPLEMENTED |
@@ -25,7 +25,7 @@ This document records the implemented local prototype. Product validation and hi
 
 ## Architecture and boundaries
 
-Fastify → bearer-session ownership → deterministic policy → SQLite orders/quotes/requests. A single interval worker consumes durable jobs → YouCam REST API. Images are normalized locally and uploaded only after separate provider consent. Source bytes are held in SQLite for at most one hour; merchant references last 30 days. Result URLs have a local expiry. Deletion cannot revoke provider copies or previously disclosed URLs.
+Fastify → bearer-session ownership → deterministic policy → SQLite orders/quotes/requests. A single interval worker consumes durable jobs → YouCam REST API. Images are normalized locally and uploaded only after separate provider consent. Shopper source bytes are held in SQLite for at most one hour; imported merchant references last 30 days, while bundled seeded synthetic references last 90 days. Result URLs have a local expiry. Deletion cannot revoke provider copies or previously disclosed URLs.
 
 There are no production accounts or externally verified orders. Seeder-generated sessions are local demo credentials. CORS is not enabled; the shopper page uses same-origin routing. No arbitrary image URL fetch or external webhook ingress is exposed. API key never leaves the backend.
 
@@ -40,13 +40,13 @@ There are no production accounts or externally verified orders. Seeder-generated
 
 Actual execution results belong in evidence/verification.txt. Mocked provider execution is never evidence of a real YouCam render.
 
-Verification completed: 20/20 tests passed after the guest-demo milestone; final TypeScript/build/smoke results are recorded in [verification](../../evidence/verification.txt). A browser walkthrough reached a persisted exchange receipt. One live synthetic YouCam task succeeded and produced a saved result, with a TLS limitation recorded in verification. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
+Verification completed: 20/20 tests passed after the three-look milestone; TypeScript/build results are recorded in [verification](../../evidence/verification.txt). A browser walkthrough verified all three product references and matching recorded results. Three live synthetic YouCam tasks succeeded and produced saved results; the initial run's TLS limitation and the later verified-TLS runs are recorded in evidence. Installation audit previously reported zero known vulnerabilities after upgrading sharp and restoring the Windows native dependency.
 
 ## Ranked remaining gaps
 
 P0 / High for hackathon submission: entrant eligibility, a public/source-accessible repository and license, judge-accessible working build, public 1–3 minute video, and Devpost submission are incomplete. User approval is required for external publication and submission.
 
-P0 / High technical caveat: one synthetic live result was inspected, but billing, provider retention, repeated-run reliability, and merchant demand have not been validated. The first run inherited disabled TLS certificate verification; the runner now clears that setting, but no second paid run has verified the fix in live transport. Rotate the key before future provider use.
+P0 / High technical caveat: three synthetic live results were inspected, but billing, provider retention, broader reliability, and merchant demand have not been validated. The first run inherited disabled TLS certificate verification; the two later runs used the Windows system CA with validation on. The user rotated the key before those runs.
 
 P1 / High before public use: replace demo sessions with verified identity and merchant order authorization; isolate merchants; add encrypted managed storage and a tested retention policy; implement reservations/settlement only when merchant integrations exist. Do not expose this local prototype as a production return portal.
 

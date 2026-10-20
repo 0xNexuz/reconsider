@@ -174,6 +174,12 @@ test('public demo page serves synthetic media while shopper APIs remain protecte
     assert.equal((await f.app.inject({ url: '/demo/app.js' })).statusCode, 200);
     assert.equal((await f.app.inject({ url: '/demo/styles.css' })).statusCode, 200);
     assert.equal((await f.app.inject({ url: '/demo/recorded-result.jpg' })).statusCode, 200);
+    for (const look of ['v-neck', 'round-neck', 'collared']) {
+      const result = await f.app.inject({ url: `/demo/results/${look}.jpg` });
+      assert.equal(result.statusCode, 200);
+      assert.match(String(result.headers['content-type']), /image\/jpeg/);
+      assert.ok(result.rawPayload.length > 10000);
+    }
     assert.equal((await f.app.inject({ url: '/v1/orders' })).statusCode, 401);
   } finally { await f.close(); }
 });

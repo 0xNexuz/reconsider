@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with implementation details in [README](../README.md) and [backend status](build-harness/implementation-status.md).
+Last updated: 2026-10-20 (Africa/Lagos). Source of truth for continuation, with implementation details in [README](../README.md) and [backend status](build-harness/implementation-status.md).
 
 ## Project identity and Git state
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 - **State:** demo orders/catalog, server-side quotes, idempotent requests, normalized images, durable render jobs. User bearer sessions are seeded locally and valid 24 hours.
 - **Provider:** server-only YouCam Clothes V4 adapter. The user added a key locally; `YOUCAM_ENABLED=false` remains in `.env`. One isolated run was explicitly authorized by “you can handle the rest” and completed. Do not repeat a paid run without fresh authorization.
 - **Approved scope:** backend and integrations, local implementation/testing/submission preparation, and publication of this GitHub source repository. No app deployment, demo-video publication, Devpost submission, or credential disclosure is authorized. A further provider run is a new cost boundary.
-- **Trust limits:** sample commerce data is SIMULATED. No merchant account, payment, inventory reservation, or fulfillment integration exists. Provider wire behavior is MOCKED in tests; one live render with SYNTHETIC images succeeded.
+- **Trust limits:** sample commerce data is SIMULATED. No merchant account, payment, inventory reservation, or fulfillment integration exists. Provider wire behavior is MOCKED in tests; three live renders with SYNTHETIC images succeeded.
 
 ## Verified milestones and evidence
 
@@ -31,10 +31,10 @@ Last updated: 2026-10-19 (Africa/Lagos). Source of truth for continuation, with 
 |---|---|---|
 | Authenticated order and candidate API, authoritative quote, exchange/refund requests | VERIFIED locally | Prior 15/15 tests and compiled HTTP smoke test, recorded in [verification](../evidence/verification.txt) |
 | Image consent, validation, local expiry/deletion, render quota and job lifecycle | VERIFIED locally; provider MOCKED | Same recorded tests |
-| YouCam upload/task/poll adapter | VERIFIED for one synthetic live run; broader reliability UNVERIFIED | One task succeeded and returned a saved image; [sanitized run record](../evidence/live-run-1792439336401.json) |
+| YouCam upload/task/poll adapter | VERIFIED for three synthetic live runs; broader reliability UNVERIFIED | Blue, rust, and green tasks succeeded with saved images; sanitized records in `evidence/` |
 | Shopper retrieval of merchant garment reference image | VERIFIED locally | Full 16/16 suite includes authentication, ownership, stock, and byte-response checks; see [verification](../evidence/verification.txt) |
 | Offline integration preflight | VERIFIED locally | Local image normalization and redacted key-presence check; full suite 17/17, typecheck and build passed |
-| Same-origin shopper view | VERIFIED locally | One-click isolated guest order, candidate selection, recorded comparison, quote, and persisted exchange receipt. Latest suite 20/20; see [verification](../evidence/verification.txt) |
+| Same-origin shopper view | VERIFIED locally | One-click guest order, three image-backed candidates, switching between matching real recorded YouCam outputs, quotes, and persisted request. Latest suite 20/20; see [verification](../evidence/verification.txt) |
 | Submission copy and shot plan | DRAFTED locally | [Draft](submission-draft.md) and [submission map](build-harness/12_submission-map.md); no video or public URL yet |
 
 The previous installation audit found zero known vulnerabilities after the sharp update. That is a historical command result, not a continuing security guarantee.
@@ -42,7 +42,7 @@ The previous installation audit found zero known vulnerabilities after the sharp
 ## Priorities and blockers
 
 - **P0 for submission:** public source repository with MIT code/documentation licensing is DONE. Verify entrant eligibility and registration; provide a judge-accessible working build; record and publish a public 1–3 minute demo video; submit the Devpost entry before the deadline. Those remaining external steps require approval.
-- **P0 technical caveat:** one synthetic live YouCam render succeeded and was visually inspected. Billing, provider retention, repeated-run reliability, and merchant demand remain unverified. Rotate the key before further provider use because the prior live run inherited disabled TLS verification.
+- **P0 technical caveat:** three synthetic live YouCam renders succeeded and were visually inspected. The first inherited disabled TLS verification; the two October 20 tasks used Node's trusted Windows system CA with certificate validation on. Billing, provider retention, broader reliability, and merchant demand remain unverified.
 - **P1:** production identity, merchant authorization, image storage/retention, and a real commerce adapter are needed before public use. These are outside the current local prototype.
 - **P2:** formal API contract and a reusable quote module after a second adopter exists.
 - **P3:** additional garment categories or visual polish.
@@ -78,7 +78,7 @@ The previous installation audit found zero known vulnerabilities after the sharp
 - **Decision:** use generated synthetic shopper and product images for one isolated end-to-end provider run, with a one-job quota and no local demo database mutation.
 - **Evidence:** one Clothes V4 task succeeded and its image was saved at `demo-assets/youcam-result-1792439336399.jpg`. The sanitized JSON record and narrative are in `evidence/`. The final code passes 18/18 tests, typecheck, and build.
 - **Observation:** the result shows the cobalt blouse with visible V-neck and sleeves on the synthetic shopper. This is one visual inspection, not a demographic or reliability evaluation.
-- **Security limitation:** the first live run inherited `NODE_TLS_REJECT_UNAUTHORIZED=0` from the shell, so transport certificate verification was disabled during that run. The live runner now clears this setting like the server; no second task was submitted. Do not treat the run as transport-security verification.
+- **Security limitation:** the first live run inherited `NODE_TLS_REJECT_UNAUTHORIZED=0` from the shell, so transport certificate verification was disabled during that run. The live runner now clears this setting; the two October 20 successful runs used the Windows system certificate store and verified TLS.
 
 ### 2026-10-19 — Same-origin shopper walkthrough and submission draft
 
@@ -97,6 +97,12 @@ The previous installation audit found zero known vulnerabilities after the sharp
 - **Decision:** published the existing local source at [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The user selected MIT for code and documentation while excluding demo images from that grant; [asset terms](../ASSETS.md) explain the distinction. The public `main` branch and expected source/asset files were verified; `.env`, demo tokens, database, dependencies, and build output were absent from the remote tree.
 - **Boundary:** source publication only. A judge-accessible deployed app, public video, further API credits, and Devpost submission remain separate steps.
 
+### 2026-10-20 — Three-look recorded comparison
+
+- **Decision:** after the user rotated the key and approved up to two additional Clothes V4 tasks, generate rust and green synthetic garment references and run them with the same synthetic shopper. One preliminary local queue failed at the provider TLS handshake before any provider request; a read-only HTTPS check identified the missing Node system CA trust. Both subsequent tasks succeeded with `NODE_USE_SYSTEM_CA=1` and certificate validation on. No more provider tasks are authorized.
+- **Evidence:** sanitized `evidence/live-run-1792459738614.json` and `evidence/live-run-1792459818447.json`, the two saved JPGs in `demo-assets/`, local test suite 20/20, and browser walkthrough of all three options.
+- **Impact:** all three eligible replacements have product images and matching genuine recorded YouCam outputs. The same synthetic shopper can switch looks in the hero and comparison view. Seed installs bundled references automatically; the guest demo still cannot spend API units.
+
 ## Next action and boundary
 
-The public source and license gate is complete. Next obtain user approval for judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to the published assets. Assess whether the judging build needs an authorized, budgeted live-render path; any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.
+Local three-look implementation is complete. The current changes are local and need a separately authorized push to update public GitHub. Then obtain approval for judge-accessible hosting, public video upload, and Devpost submission. The user must verify eligibility and rights to the assets. Any additional live render needs renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.

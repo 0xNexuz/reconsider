@@ -6,9 +6,9 @@ Public source: [0xNexuz/reconsider](https://github.com/0xNexuz/reconsider). The 
 
 Source code, scripts, and documentation are [MIT licensed](LICENSE). The synthetic demo images and recorded YouCam output are [excluded from that license](ASSETS.md) and included for project evaluation.
 
-**Commerce is demonstration data.** A request does not charge/refund money, reserve stock, or ship a replacement. YouCam is disabled by default; there is no mock provider in the running application. Automated provider tests use mocked HTTP; one separately recorded synthetic live task succeeded.
+**Commerce is demonstration data.** A request does not charge/refund money, reserve stock, or ship a replacement. YouCam is disabled by default; there is no mock provider in the running application. Automated provider tests use mocked HTTP; three separately recorded synthetic live tasks succeeded.
 
-One isolated YouCam Clothes V4 task using generated synthetic images succeeded on 2026-10-19. Its [recorded result](demo-assets/youcam-result-1792439336399.jpg) is a prior output, not a fresh render on every request. The first live runner inherited disabled TLS certificate checks from the shell; that runner has since been fixed, but no second paid task was submitted. See [verification](evidence/verification.txt).
+The browser includes three genuine recorded YouCam Clothes V4 outputs for one synthetic shopper wearing distinct demo garments. The first succeeded on October 19, 2026, with TLS certificate validation disabled by the inherited development shell. Two further tasks succeeded on October 20 after enabling Node's Windows system certificate store, with certificate validation on. Each is a prior output, never a fresh render when a guest switches looks. See [verification](evidence/verification.txt).
 
 ## Run locally
 
@@ -18,12 +18,11 @@ Requires Node 24.x (uses Node's experimental built-in SQLite), npm, and a writab
 npm ci
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm run seed
-npm run catalog:image -- v-neck demo-assets\synthetic-blouse.png
 npm run build
 npm start
 ```
 
-On macOS/Linux, replace the conditional PowerShell copy with `test -f .env || cp .env.example .env`; the `npm` commands are the same. Keep `YOUCAM_ENABLED=false` for the recorded-example demo. The server binds to `127.0.0.1:3100` by default.
+On macOS/Linux, replace the conditional PowerShell copy with `test -f .env || cp .env.example .env`; the `npm` commands are the same. Seeding installs all three bundled synthetic garment references into the local catalog. Keep `YOUCAM_ENABLED=false` for the recorded-example demo. The server binds to `127.0.0.1:3100` by default.
 
 Open the browser view at `http://127.0.0.1:3100/` and click **Start the guided demo**. It creates a fresh, isolated sample order, so the entire exchange or refund path is repeatable without copying a token. The token is kept only in browser-tab memory. Guest sessions cannot upload images or queue paid previews even if a provider is configured. `GET /health` is public; all `/v1` endpoints require `Authorization: Bearer <token>`. For API testing, seeding still writes random 24-hour Alice/Bob tokens to ignored `demo-access.json`; the manual-token form is tucked into the page. Re-seeding rotates those tokens but preserves existing requests. Guest sessions are enabled automatically only on the loopback bind; `DEMO_GUEST_SESSIONS=true` would enable them on another bind and requires a deliberate release review. Do not expose this prototype on the public internet without that review: production identity, distributed rate limits, encryption-at-rest, and merchant integrations remain future work.
 

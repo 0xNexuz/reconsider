@@ -27,7 +27,7 @@ export function createApp(db: DB, provider: Provider, options: { now?: () => num
     const bucket = rate.get(req.ip) ?? { count: 0, until: now() + 60000 };
     rate.set(req.ip, bucket);
     if (++bucket.count > 120) throw new Fault(429, 'RATE_LIMITED');
-    if (['/health', '/', '/demo/app.js', '/demo/styles.css', '/demo/shopper.png', '/demo/blouse.png', '/demo/recorded-result.jpg'].includes(req.url.split('?')[0] ?? '')) return;
+    if (['/health', '/', '/demo/app.js', '/demo/styles.css', '/demo/shopper.png', '/demo/blouse.png', '/demo/recorded-result.jpg', '/demo/results/v-neck.jpg', '/demo/results/round-neck.jpg', '/demo/results/collared.jpg'].includes(req.url.split('?')[0] ?? '')) return;
     if (req.method === 'POST' && req.url === '/demo/session' && options.demoGuestSessions) return;
     const token = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
     if (!token) throw new Fault(401, 'UNAUTHORIZED');
@@ -50,6 +50,15 @@ export function createApp(db: DB, provider: Provider, options: { now?: () => num
   app.get('/demo/shopper.png', async (_req, reply) => reply.type('image/png').send(readFileSync(new URL('../demo-assets/synthetic-shopper.png', import.meta.url))));
   app.get('/demo/blouse.png', async (_req, reply) => reply.type('image/png').send(readFileSync(new URL('../demo-assets/synthetic-blouse.png', import.meta.url))));
   app.get('/demo/recorded-result.jpg', async (_req, reply) => reply.type('image/jpeg').send(readFileSync(new URL('../demo-assets/youcam-result-1792439336399.jpg', import.meta.url))));
+  const recordedResults: Record<string, string> = {
+    'v-neck': 'youcam-result-1792439336399.jpg',
+    'round-neck': 'youcam-result-1792459738608.jpg',
+    'collared': 'youcam-result-1792459818444.jpg'
+  };
+  app.get('/demo/results/:id.jpg', async (req, reply) => {
+    const { id } = z.object({ id: z.enum(['v-neck', 'round-neck', 'collared']) }).parse(req.params);
+    return reply.type('image/jpeg').send(readFileSync(new URL(`../demo-assets/${recordedResults[id]}`, import.meta.url)));
+  });
   if (options.demoGuestSessions) app.post('/demo/session', async (req, reply) => {
     for (const [key, entry] of guestRate) if (entry.until <= now()) guestRate.delete(key);
     const bucket = guestRate.get(req.ip) ?? { count: 0, until: now() + 3600000 };
