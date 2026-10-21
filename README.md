@@ -2,7 +2,7 @@
 
 **See the replacement before deciding what to do with a return.** Reconsider is a hackathon prototype for apparel shoppers who are uncertain about a style. It connects a reason for returning an item to eligible alternatives, a visual comparison, a server-calculated price difference, and an explicit sample exchange or refund decision.
 
-[Try the public judge demo](https://reconsider-tan.vercel.app/) · [Read the submission description](docs/submission-draft.md) · [Inspect verification evidence](evidence/verification.txt)
+[Try the public judge demo](https://reconsider-tan.vercel.app/) · [Watch the entrant's demo video](https://youtu.be/W_LDNskA_e8) · [Read the submission description](docs/submission-draft.md) · [Inspect verification evidence](evidence/verification.txt)
 
 ## The YouCam integration
 
@@ -56,6 +56,28 @@ Import a suitable garment reference with `npm run catalog:image -- v-neck C:\pat
 
 ## Architecture and safeguards
 
+```mermaid
+flowchart LR
+  subgraph Hosted["Public judge demo — recorded only"]
+    Judge["Judge's browser"] --> UI["Web UI · web/"]
+    UI --> HostedAPI["Vercel function · api/handler.ts"]
+    HostedAPI --> Sample["Signed sample sessions, catalog and quotes"]
+    UI --> Saved["Three saved YouCam results"]
+    UI --> Tab["Decision history in this browser tab"]
+  end
+
+  subgraph Local["Locally runnable live-capable prototype"]
+    Shopper["Browser or API client"] --> Fastify["Fastify · src/app.ts"]
+    Fastify --> SQLite["SQLite · orders, catalog and decisions"]
+    Fastify --> Worker["Consent-gated worker · src/jobs.ts"]
+    Worker --> Adapter["YouCam adapter · src/youcam.ts"]
+  end
+
+  Adapter -- "File API upload, Clothes V4 task and polling" --> YouCam["Perfect Corp. YouCam API"]
+```
+
+The hosted path serves recorded outputs and cannot create YouCam tasks or consume API units. Only an explicitly enabled, authenticated local path can send consented images through the adapter.
+
 | Component | Responsibility |
 |---|---|
 | Public Vercel function, `api/handler.ts` | Signed sample sessions, simulated catalog, server-calculated quotes, recorded-only flow; no provider credentials or persistent merchant records |
@@ -80,4 +102,4 @@ The suite covers ownership, quote tampering, stale stock/price, duplicate decisi
 
 ## License and media
 
-Code and documentation are [MIT licensed](LICENSE). Synthetic input images, recorded YouCam outputs, and project screenshots are [excluded from that grant](ASSETS.md) and included for evaluation. No real shopper photos or API credentials are committed. The required submission video is being produced separately by the entrant and is not part of this repository.
+Code and documentation are [MIT licensed](LICENSE). Synthetic input images, recorded YouCam outputs, the favicon, and project screenshots are [excluded from that grant](ASSETS.md) and included for evaluation. No real shopper photos or API credentials are committed. The [entrant-produced demo video](https://youtu.be/W_LDNskA_e8) is hosted on YouTube, not in this repository.

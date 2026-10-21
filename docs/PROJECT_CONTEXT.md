@@ -35,13 +35,13 @@ Last updated: 2026-10-20 (Africa/Lagos). Source of truth for continuation, with 
 | Shopper retrieval of merchant garment reference image | VERIFIED locally | Full 16/16 suite includes authentication, ownership, stock, and byte-response checks; see [verification](../evidence/verification.txt) |
 | Offline integration preflight | VERIFIED locally | Local image normalization and redacted key-presence check; full suite 17/17, typecheck and build passed |
 | Same-origin shopper view | VERIFIED locally | One-click guest order, three image-backed candidates, switching between matching real recorded YouCam outputs, quotes, and persisted request. Latest suite 20/20; see [verification](../evidence/verification.txt) |
-| Public judge build and submission package | DEPLOYED; entrant video pending | [Demo](https://reconsider-tan.vercel.app/), [draft](submission-draft.md); earlier 22/22 tests and public smoke passed |
+| Public judge build and submission package | DEPLOYED; video supplied; Devpost status unverified | [Demo](https://reconsider-tan.vercel.app/), [video](https://youtu.be/W_LDNskA_e8), [draft](submission-draft.md); 23/23 tests and public smoke passed |
 
 The previous installation audit found zero known vulnerabilities after the sharp update. That is a historical command result, not a continuing security guarantee.
 
 ## Priorities and blockers
 
-- **P0 for submission:** public repository, judge build, and eligibility confirmation are done. The entrant is producing a replacement video; publish it to YouTube/Vimeo, verify anonymous playback, complete the Devpost entry, and review its final legally binding terms before submit.
+- **P0 for submission:** public repository, judge build, eligibility confirmation, and an entrant-produced video link are available. The entrant must check the video's duration and content, complete the Devpost entry, and review its final legally binding terms before submit; submission status is unverified.
 - **P0 technical caveat:** three synthetic live YouCam renders succeeded and were visually inspected. The first inherited disabled TLS verification; the two October 20 tasks used Node's trusted Windows system CA with certificate validation on. Billing, provider retention, broader reliability, and merchant demand remain unverified.
 - **P1:** production identity, merchant authorization, image storage/retention, and a real commerce adapter are needed before public use. These are outside the current local prototype.
 - **P2:** formal API contract and a reusable quote module after a second adopter exists.
@@ -111,7 +111,7 @@ The previous installation audit found zero known vulnerabilities after the sharp
 
 ## Next action and boundary
 
-The user authorized push, publication, and Vercel deployment and confirmed Devpost registration and eligibility. Verify final pushed SHA and production deployment, receive the entrant-produced public YouTube/Vimeo video URL, then complete the Devpost entry. The entrant must review the final form and legally binding submission terms at the actual final-submit action. Additional live renders need renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.
+The user authorized push, publication, and Vercel deployment and confirmed Devpost registration and eligibility. The entrant supplied a [public YouTube walkthrough](https://youtu.be/W_LDNskA_e8) and chose to fill and submit the Devpost form themselves. Submission status is unverified. Additional live renders need renewed cost approval. Keep the key only in ignored `.env`, with `YOUCAM_ENABLED=false` at rest.
 
 ### 2026-10-20 — Entrant feedback on submission UX
 

@@ -1,6 +1,6 @@
 # Reconsider — Devpost entry draft
 
-**Status:** prepared, not submitted. The entrant is making a new video; no video file or public video URL is in this repository.
+**Status:** copy prepared; Devpost submission status is unverified. The entrant's public video is hosted on YouTube, not in this repository.
 
 ## Title and pitch
 
@@ -33,6 +33,6 @@ YouCam's visual result is useful for comparing appearance, but it is not a fit p
 - **Working app:** [https://reconsider-tan.vercel.app/](https://reconsider-tan.vercel.app/)
 - **Public code:** [https://github.com/0xNexuz/reconsider](https://github.com/0xNexuz/reconsider)
 - **Screenshots:** `submission/media/` contains revised hero, alternatives, and matching-comparison captures. Capture a fresh sample-decision screen before uploading screenshots to Devpost.
-- **Public 1–3-minute video:** entrant-produced; URL pending. Show the functioning app and explain that Clothes V4 produced the three previously recorded synthetic results. Keep the recorded label visible. Do not show credentials, private photos, bearer tokens, or signed URLs.
+- **Public demo video:** [entrant-produced YouTube walkthrough](https://youtu.be/W_LDNskA_e8). Its page resolves publicly; independently check its duration and footage against the 1–3-minute rule before submitting.
 
 The entrant confirmed registration and eligibility on October 20, 2026. The final Devpost form and legally binding submission terms still require their review. The [submission map](build-harness/12_submission-map.md) records the exact remaining actions.
