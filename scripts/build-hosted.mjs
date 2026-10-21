@@ -7,6 +7,7 @@ function copy(from, to) {
 }
 
 copy('../web/index.html', '../public/index.html');
+copy('../web/favicon.png', '../public/favicon.png');
 copy('../web/app.js', '../public/demo/app.js');
 copy('../web/styles.css', '../public/demo/styles.css');
 copy('../demo-assets/synthetic-shopper.png', '../public/demo/shopper.png');

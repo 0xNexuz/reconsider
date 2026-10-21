@@ -27,7 +27,7 @@ export function createApp(db: DB, provider: Provider, options: { now?: () => num
     const bucket = rate.get(req.ip) ?? { count: 0, until: now() + 60000 };
     rate.set(req.ip, bucket);
     if (++bucket.count > 120) throw new Fault(429, 'RATE_LIMITED');
-    if (['/health', '/', '/demo/app.js', '/demo/styles.css', '/demo/shopper.png', '/demo/blouse.png', '/demo/recorded-result.jpg', '/demo/results/v-neck.jpg', '/demo/results/round-neck.jpg', '/demo/results/collared.jpg'].includes(req.url.split('?')[0] ?? '')) return;
+    if (['/health', '/', '/favicon.png', '/demo/app.js', '/demo/styles.css', '/demo/shopper.png', '/demo/blouse.png', '/demo/recorded-result.jpg', '/demo/results/v-neck.jpg', '/demo/results/round-neck.jpg', '/demo/results/collared.jpg'].includes(req.url.split('?')[0] ?? '')) return;
     if (req.method === 'POST' && req.url === '/demo/session' && options.demoGuestSessions) return;
     const token = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
     if (!token) throw new Fault(401, 'UNAUTHORIZED');
@@ -45,6 +45,7 @@ export function createApp(db: DB, provider: Provider, options: { now?: () => num
   app.get('/', async (_req, reply) => reply.type('text/html; charset=utf-8').header('Content-Security-Policy',
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: https://yce-us.s3-accelerate.amazonaws.com https://yce-us.s3.amazonaws.com; connect-src 'self'; base-uri 'none'; form-action 'self'")
     .send(readFileSync(new URL('../web/index.html', import.meta.url))));
+  app.get('/favicon.png', async (_req, reply) => reply.type('image/png').send(readFileSync(new URL('../web/favicon.png', import.meta.url))));
   app.get('/demo/app.js', async (_req, reply) => reply.type('application/javascript').send(readFileSync(new URL('../web/app.js', import.meta.url))));
   app.get('/demo/styles.css', async (_req, reply) => reply.type('text/css').send(readFileSync(new URL('../web/styles.css', import.meta.url))));
   app.get('/demo/shopper.png', async (_req, reply) => reply.type('image/png').send(readFileSync(new URL('../demo-assets/synthetic-shopper.png', import.meta.url))));

@@ -117,3 +117,9 @@ The user authorized push, publication, and Vercel deployment and confirmed Devpo
 
 - **Decision:** remove the earlier draft video from the repository; the entrant will make their own. Remove the browser token form, replace shipping/request language with sample-decision language, make recorded outfit switches visually immediate, and add distinct guidance for fit, damage, and other reasons without claiming unsupported VTO capabilities.
 - **Evidence:** 23/23 tests, both TypeScript checks, hosted/local builds, and a local browser pass of outfit switching, three style alternatives, and fit-specific guidance. No new YouCam units. Push and production verification remain.
+
+### 2026-10-21 — Faster alternatives and favicon
+
+- **Decision:** Render eligible replacement cards as soon as the catalog responds, then fill in each reference image independently. Use the entrant's wordmark as the visual basis for a compact `r.` favicon in both local and hosted builds.
+- **Reason:** Awaiting all three image responses kept the button in its “Working…” state even after the alternatives had arrived.
+- **Evidence:** 23/23 tests, TypeScript check, JavaScript syntax check, and hosted build passed. Production verification follows deployment; no provider units used.

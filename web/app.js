@@ -11,6 +11,7 @@ let hostedDemo = false;
 let browserRequests = [];
 let selectionRun = 0;
 const productImages = new Map();
+const productImageLoads = new Map();
 const recordedLooks = {
   'v-neck': { name: 'Cobalt V-neck', url: '/demo/results/v-neck.jpg' },
   'round-neck': { name: 'Terracotta round-neck', url: '/demo/results/round-neck.jpg' },
@@ -60,17 +61,28 @@ async function api(path, options = {}) {
   }
   return response.status === 204 ? null : response.json();
 }
-async function imageFor(product) {
-  if (productImages.has(product.id)) return productImages.get(product.id);
-  if (product.preview_available) {
-    try {
-      const response = await fetch(`/v1/products/${encodeURIComponent(product.id)}/image`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
-      if (response.ok) { const url = URL.createObjectURL(await response.blob()); productImages.set(product.id, url); return url; }
-    } catch {}
-  }
-  const fallback = product.id === 'v-neck' ? '/demo/blouse.png' : null;
-  if (fallback) productImages.set(product.id, fallback);
-  return fallback;
+function imageFor(product) {
+  if (productImages.has(product.id)) return Promise.resolve(productImages.get(product.id));
+  if (productImageLoads.has(product.id)) return productImageLoads.get(product.id);
+  const load = (async () => {
+    if (hostedDemo && recordedLooks[product.id]) {
+      const url = `/demo/garments/${product.id}.png`;
+      productImages.set(product.id, url);
+      return url;
+    }
+    if (product.preview_available) {
+      try {
+        const response = await fetch(`/v1/products/${encodeURIComponent(product.id)}/image`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' });
+        if (response.ok) { const url = URL.createObjectURL(await response.blob()); productImages.set(product.id, url); return url; }
+      } catch {}
+    }
+    const fallback = product.id === 'v-neck' ? '/demo/blouse.png' : null;
+    if (fallback) productImages.set(product.id, fallback);
+    return fallback;
+  })();
+  productImageLoads.set(product.id, load);
+  void load.then(() => productImageLoads.delete(product.id));
+  return load;
 }
 function setBusy(button, busy, label) {
   button.disabled = busy;
@@ -125,15 +137,9 @@ async function findCandidates() {
       const detail = document.createElement('p'); detail.textContent = reason === 'style' ? 'No eligible style is in stock for this sample order. You can still save a sample refund decision.' : reasonGuidance[reason].detail;
       guide.append(title, detail); container.append(guide); return;
     }
-    const sources = await Promise.all(result.data.map(imageFor));
-    for (const [index, product] of result.data.entries()) {
+    for (const product of result.data) {
       const card = document.createElement('article'); card.className = 'candidate';
-      const source = sources[index];
-      if (source) {
-        const img = document.createElement('img'); img.src = source; img.alt = `${product.name} product reference`; img.loading = 'lazy'; card.append(img);
-      } else {
-        const placeholder = document.createElement('div'); placeholder.className = 'candidate-placeholder'; placeholder.textContent = 'Product image not available'; card.append(placeholder);
-      }
+      const placeholder = document.createElement('div'); placeholder.className = 'candidate-placeholder'; placeholder.textContent = 'Loading product image…'; card.append(placeholder);
       const body = document.createElement('div'); body.className = 'candidate-body';
       if (recordedLooks[product.id]) {
         const badge = document.createElement('span'); badge.className = 'candidate-badge'; badge.textContent = 'Recorded try-on available'; body.append(badge);
@@ -143,6 +149,12 @@ async function findCandidates() {
       const price = document.createElement('div'); price.className = 'price'; price.textContent = `${money(Math.abs(product.price - order.paid), product.currency)} ${product.price >= order.paid ? 'additional' : 'credit'}`;
       const choose = document.createElement('button'); choose.className = 'button outline'; choose.type = 'button'; choose.textContent = 'Compare this piece'; choose.addEventListener('click', () => select(product, choose));
       body.append(title, detail, price, choose); card.append(body); container.append(card);
+      void imageFor(product).then(source => {
+        if (!card.isConnected) return;
+        if (!source) { placeholder.textContent = 'Product image not available'; return; }
+        const img = document.createElement('img'); img.src = source; img.alt = `${product.name} product reference`; img.loading = 'eager';
+        placeholder.replaceWith(img);
+      });
     }
   } catch (error) { notice(error.message, true); }
   finally { setBusy(button, false, label); }
@@ -172,6 +184,11 @@ async function select(product, button) {
   if (!placeholder) { placeholder = document.createElement('div'); placeholder.id = 'reference-placeholder'; placeholder.className = 'reference-placeholder'; refImage.parentElement.append(placeholder); }
   placeholder.hidden = Boolean(source);
   placeholder.textContent = 'Product image not available for this item.';
+  if (!source) void imageFor(product).then(loaded => {
+    if (run !== selectionRun || !loaded) return;
+    refImage.src = loaded; refImage.alt = `${product.name} product reference`;
+    refImage.hidden = false; placeholder.hidden = true;
+  });
   const recorded = recordedLooks[product.id];
   $('result-figure').hidden = !recorded;
   $('comparison-disclosure').textContent = recorded
