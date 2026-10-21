@@ -122,4 +122,4 @@ The user authorized push, publication, and Vercel deployment and confirmed Devpo
 
 - **Decision:** Render eligible replacement cards as soon as the catalog responds, then fill in each reference image independently. Use the entrant's wordmark as the visual basis for a compact `r.` favicon in both local and hosted builds.
 - **Reason:** Awaiting all three image responses kept the button in its “Working…” state even after the alternatives had arrived.
-- **Evidence:** 23/23 tests, TypeScript check, JavaScript syntax check, and hosted build passed. Production verification follows deployment; no provider units used.
+- **Evidence:** 23/23 tests, both TypeScript checks, JavaScript syntax check, and both builds passed. Commit `ee9b2b5` was pushed; Vercel production is Ready and aliases `reconsider-tan.vercel.app`. The public end-to-end smoke check passed, and the hosted favicon returned image/png with the new script. No provider units used.
