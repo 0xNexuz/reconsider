@@ -24,7 +24,9 @@ Automated tests mock provider HTTP to cover the upload/task/poll contract and fa
 - **Damaged item:** explains that a retailer must assess the damage; the demo offers a sample refund decision and does not pretend the image diagnoses damage.
 - **Other reason:** gives a clear sample refund route without requiring a photo.
 
-The shopper can save an exchange or refund **decision**. The public site uses a signed, isolated sample session and keeps its decision history only in the current browser tab. The separately runnable Fastify/SQLite application persists sample requests locally and contains the consent-gated live YouCam adapter. Neither version places an order, charges or refunds money, reserves stock, contacts a retailer, or arranges fulfillment. Merchant impact and real-shopper performance have not been measured.
+The comparison names the original sample blouse and its $50 paid price beside the selected garment and its current sample price. It does not substitute a replacement photo for the original product photo, which was not supplied. The final receipt repeats the chosen replacement and quote difference, or the original amount for a refund.
+
+The shopper can save an exchange or refund **decision**. The public site uses a signed, isolated sample session and keeps its decision history in browser memory **only until refresh or close**. Starting a new guided demo also clears that view. The separately runnable Fastify/SQLite application persists sample requests locally and contains the consent-gated live YouCam adapter. Neither version places an order, charges or refunds money, reserves stock, contacts a retailer, or arranges fulfillment. Merchant impact and real-shopper performance have not been measured.
 
 ## Run locally
 
@@ -96,9 +98,11 @@ npm run typecheck:hosted
 npm test
 npm run build
 npm run build:hosted
+node --check web/app.js
+node scripts/verify-hosted.mjs https://reconsider-tan.vercel.app
 ```
 
-The suite covers ownership, quote tampering, stale stock/price, duplicate decisions, non-style fallback, image consent and metadata handling, provider protocol with mocked HTTP, job limits, and hosted-session token integrity. The [verification log](evidence/verification.txt) distinguishes mocked checks, real synthetic provider results, and browser observations. The [submission map](docs/build-harness/12_submission-map.md) tracks the remaining Devpost actions.
+The suite covers ownership, quote tampering, stale stock/price, duplicate decisions, non-style fallback, image consent and metadata handling, provider protocol with mocked HTTP, job limits, and hosted-session token integrity. The public smoke script verifies that all three deployed recorded images have the same SHA-256 hashes as the bundled provider outputs; it also exercises separate guest sessions, three garment references and quotes, exchange/refund decisions, invalid and cross-session quote rejection, non-style fallback, and provider-endpoint denial. It does not spend YouCam units. The [verification log](evidence/verification.txt) distinguishes mocked checks, real synthetic provider results, and browser observations. The [submission map](docs/build-harness/12_submission-map.md) tracks the remaining Devpost actions.
 
 ## License and media
 

@@ -52,7 +52,9 @@ function money(cents, currency = 'USD') {
 function orderLabel() { return isGuest ? 'Sample order' : `Order ${order.id}`; }
 async function api(path, options = {}) {
   const headers = { authorization: `Bearer ${token}`, ...options.headers };
-  const response = await fetch(path, { ...options, headers, cache: 'no-store' });
+  let response;
+  try { response = await fetch(path, { ...options, headers, cache: 'no-store' }); }
+  catch { throw new Error('The demo could not reach its server. Check your connection and try again.'); }
   if (!response.ok) {
     let body = {};
     try { body = await response.json(); } catch {}
@@ -89,17 +91,18 @@ function setBusy(button, busy, label) {
   button.textContent = busy ? 'Working…' : label;
 }
 async function openOrder() {
-    const [orders, health] = await Promise.all([api('/v1/orders'), fetch('/health').then(r => r.json())]);
+    const [orders, health] = await Promise.all([api('/v1/orders'), api('/health')]);
     order = orders.data[0];
     if (!order) throw new Error('No demo order found. Run npm run seed first.');
     providerAvailable = !isGuest && health.youcam !== 'DISABLED';
     hostedDemo = health.persistence === 'BROWSER_SESSION';
     if (hostedDemo) {
       document.querySelector('.pill').textContent = 'JUDGE DEMO';
-      $('demo-storage-note').textContent = 'This hosted demonstration keeps sample decisions in this browser tab. It uses recorded YouCam results and makes no new provider calls.';
-      $('receipt-storage').textContent = 'This sample decision stays in this browser tab. No retailer receives it.';
+      $('demo-storage-note').textContent = 'This hosted demonstration keeps sample decisions in memory until this page is refreshed or closed. It uses recorded YouCam results and makes no new provider calls.';
+      $('receipt-storage').textContent = 'This sample decision is visible here until you refresh or close the page. No retailer receives it.';
     }
     $('order-summary').textContent = `${orderLabel()} · ${money(order.paid, order.currency)} paid. Choose why you're returning it.`;
+    $('original-price').textContent = `${money(order.paid, order.currency)} paid · original product photo not supplied`;
     $('live-preview-area').hidden = !providerAvailable;
     show('explore');
 }
@@ -153,6 +156,7 @@ async function findCandidates() {
         if (!card.isConnected) return;
         if (!source) { placeholder.textContent = 'Product image not available'; return; }
         const img = document.createElement('img'); img.src = source; img.alt = `${product.name} product reference`; img.loading = 'eager';
+        img.addEventListener('error', () => { if (img.isConnected) img.replaceWith(placeholder); placeholder.textContent = 'Product image unavailable. You can still compare this piece.'; });
         placeholder.replaceWith(img);
       });
     }
@@ -176,6 +180,8 @@ async function select(product, button) {
   $('exchange-button').disabled = true;
   $('preview-button').disabled = true;
   $('quote-summary').textContent = `Checking ${product.name} price and availability…`;
+  $('selected-name').textContent = product.name;
+  $('selected-price').textContent = `${money(product.price, product.currency)} sample price`;
   const source = productImages.get(product.id);
   const refImage = $('reference-image');
   refImage.hidden = !source;
@@ -184,6 +190,7 @@ async function select(product, button) {
   if (!placeholder) { placeholder = document.createElement('div'); placeholder.id = 'reference-placeholder'; placeholder.className = 'reference-placeholder'; refImage.parentElement.append(placeholder); }
   placeholder.hidden = Boolean(source);
   placeholder.textContent = 'Product image not available for this item.';
+  refImage.onerror = () => { if (run === selectionRun) { refImage.hidden = true; placeholder.hidden = false; placeholder.textContent = 'Product image unavailable. The price quote and decision remain available.'; } };
   if (!source) void imageFor(product).then(loaded => {
     if (run !== selectionRun || !loaded) return;
     refImage.src = loaded; refImage.alt = `${product.name} product reference`;
@@ -196,6 +203,11 @@ async function select(product, button) {
     : 'No recorded YouCam result exists for this item. You can still request the eligible exchange. Appearance is not an exact-fit prediction.';
   $('result-image').src = recorded?.url || '';
   $('result-image').alt = recorded ? `Recorded YouCam result: synthetic shopper wearing ${recorded.name}` : '';
+  let resultFallback = $('result-fallback');
+  if (!resultFallback) { resultFallback = document.createElement('div'); resultFallback.id = 'result-fallback'; resultFallback.className = 'reference-placeholder'; $('result-image').parentElement.append(resultFallback); }
+  resultFallback.hidden = true;
+  $('result-image').hidden = false;
+  $('result-image').onerror = () => { if (run === selectionRun) { $('result-image').hidden = true; resultFallback.hidden = false; resultFallback.textContent = 'Recorded look unavailable right now. You can still review the garment and quote.'; } };
   $('result-caption').textContent = 'RECORDED YOUCAM RESULT • SYNTHETIC EXAMPLE';
   const switcher = $('look-switcher'); switcher.replaceChildren();
   for (const alternative of candidates) {
@@ -251,8 +263,8 @@ async function decide(kind) {
     const result = await api('/v1/requests', { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': `request-${crypto.randomUUID()}` }, body: JSON.stringify(payload) });
     if (hostedDemo) browserRequests.unshift(result.data);
     $('receipt-summary').textContent = kind === 'refund'
-      ? `A sample refund decision was saved for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`
-      : `A sample exchange decision for ${selected.name} was saved for ${isGuest ? 'this sample order' : orderLabel().toLowerCase()}. No money has moved.`;
+      ? `You chose a sample refund for the ${money(order.paid, order.currency)} original purchase. No money has moved.`
+      : `You chose ${selected.name} instead of the original sample blouse. ${money(Math.abs(quote.difference), order.currency)} ${quote.difference >= 0 ? 'additional' : 'credit'} on the sample quote. No money has moved.`;
     show('receipt'); await history();
   } catch (error) {
     if (['QUOTE_STALE', 'QUOTE_EXPIRED'].includes(error.code)) show('explore');
@@ -265,7 +277,7 @@ async function history() {
     const area = $('history'); area.replaceChildren();
     for (const item of result.data) {
       const row = document.createElement('p');
-      row.textContent = `Sample ${item.kind === 'exchange' ? 'exchange' : 'refund'} decision ${item.id.slice(0, 8)}… · ${new Date(item.created_at).toLocaleString()}`;
+      row.textContent = `Sample ${item.kind === 'exchange' ? 'exchange' : 'refund'} decision · ${new Date(item.created_at).toLocaleString()}`;
       area.append(row);
     }
   } catch (error) { notice(error.message, true); }
@@ -278,7 +290,6 @@ $('refund-button').addEventListener('click', () => decide('refund'));
 $('exchange-button').addEventListener('click', () => decide('exchange'));
 $('back-button').addEventListener('click', () => show('explore'));
 $('preview-button').addEventListener('click', livePreview);
-$('restart-button').addEventListener('click', history);
 document.querySelectorAll('[data-hero-look]').forEach(button => button.addEventListener('click', () => {
   const look = recordedLooks[button.dataset.heroLook];
   if (!look) return;

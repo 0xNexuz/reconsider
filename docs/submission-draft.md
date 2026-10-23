@@ -14,9 +14,9 @@ A return is not always about a defective product. Sometimes the piece simply doe
 
 ## What it does
 
-The public [judge demo](https://reconsider-tan.vercel.app/) starts a fresh sample order. For a style concern, it shows three available garments, each with a product reference image and a matching **previously recorded real YouCam Clothes V4 result** on the same synthetic shopper. Switching garments changes the visual immediately while the server checks a new ten-minute price quote. The shopper can then save a sample exchange or refund decision.
+The public [judge demo](https://reconsider-tan.vercel.app/) starts a fresh sample order. For a style concern, it shows three available garments, each with a product reference image and a matching **previously recorded real YouCam Clothes V4 result** on the same synthetic shopper. Switching garments changes the visual immediately while the server checks a new ten-minute price quote. The comparison shows the original sample purchase and selected garment side by side in text, with the paid price and quote difference. The shopper can then save a sample exchange or refund decision.
 
-For size/fit, damage, and other reasons, the app gives reason-specific guidance and a sample refund path. It does not present a virtual try-on as evidence of fit or damage. The catalog, order, and decisions are demonstration data. The public site keeps decision history only in the current browser tab. No retailer receives the decision; no payment, refund, reservation, or fulfillment occurs.
+For size/fit, damage, and other reasons, the app gives reason-specific guidance and a sample refund path. It does not present a virtual try-on as evidence of fit or damage. The catalog, order, and decisions are demonstration data. The public site keeps decision history in browser memory only until page refresh or close. No retailer receives the decision; no payment, refund, reservation, or fulfillment occurs.
 
 ## How we built it and used YouCam
 
